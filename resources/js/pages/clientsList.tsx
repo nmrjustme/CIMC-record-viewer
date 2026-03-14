@@ -16,6 +16,24 @@ interface Props {
     filters: any;
 }
 
+
+const SkeletonRow = () => (
+    <tr className="animate-pulse">
+        <td className="px-8 py-4">
+            <div className="h-4 w-24 rounded bg-slate-200"></div>
+        </td>
+        <td className="px-8 py-4">
+            <div className="h-4 w-48 rounded bg-slate-200"></div>
+        </td>
+        <td className="px-8 py-4 text-center">
+            <div className="mx-auto h-5 w-12 rounded bg-slate-200"></div>
+        </td>
+        <td className="px-8 py-4 text-right">
+            <div className="ml-auto h-4 w-20 rounded bg-slate-200"></div>
+        </td>
+    </tr>
+);
+
 export default function RecordFinder({ patients = [], filters }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -74,8 +92,14 @@ export default function RecordFinder({ patients = [], filters }: Props) {
             mid: searchData.mid,
         };
 
-        const filteredData = Object.fromEntries(
-            Object.entries(dataToSend).filter(([_, v]) => v !== ''),
+        const filteredData = Object.entries(dataToSend).reduce(
+            (acc, [key, value]) => {
+                if  (value !== '') {
+                    acc[key] = value
+                }
+                return acc;
+            },
+            {} as any
         );
 
         router.get(`/viewer/record-finder`, filteredData, {
@@ -108,22 +132,6 @@ export default function RecordFinder({ patients = [], filters }: Props) {
         );
     };
 
-    const SkeletonRow = () => (
-        <tr className="animate-pulse">
-            <td className="px-8 py-4">
-                <div className="h-4 w-24 rounded bg-slate-200"></div>
-            </td>
-            <td className="px-8 py-4">
-                <div className="h-4 w-48 rounded bg-slate-200"></div>
-            </td>
-            <td className="px-8 py-4 text-center">
-                <div className="mx-auto h-5 w-12 rounded bg-slate-200"></div>
-            </td>
-            <td className="px-8 py-4 text-right">
-                <div className="ml-auto h-4 w-20 rounded bg-slate-200"></div>
-            </td>
-        </tr>
-    );
 
     return (
         <div className="relative min-h-screen bg-slate-100 font-sans text-slate-900">
@@ -132,11 +140,10 @@ export default function RecordFinder({ patients = [], filters }: Props) {
 
             {/* NOTIFICATION ALERT */}
             <div
-                className={`fixed top-24 right-8 z-50 transform transition-all duration-500 ${
-                    showNotification
+                className={`fixed top-24 right-8 z-50 transform transition-all duration-500 ${showNotification
                         ? 'translate-x-0 opacity-100'
                         : 'pointer-events-none translate-x-full opacity-0'
-                }`}
+                    }`}
             >
                 <div className="flex items-center gap-4 rounded-xl border border-blue-200 bg-white p-5 shadow-2xl shadow-blue-200/40">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200">
@@ -261,12 +268,11 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                                             hrn: val,
                                         });
                                 }}
-                                className={`w-full rounded-lg border px-4 py-4 font-mono text-2xl tracking-[0.2em] transition-all outline-none disabled:cursor-not-allowed disabled:bg-slate-100 ${
-                                    isHrnActive &&
-                                    searchData.hrn.length < MAX_LENGTH
+                                className={`w-full rounded-lg border px-4 py-4 font-mono text-2xl tracking-[0.2em] transition-all outline-none disabled:cursor-not-allowed disabled:bg-slate-100 ${isHrnActive &&
+                                        searchData.hrn.length < MAX_LENGTH
                                         ? 'border-orange-300 bg-orange-50 text-orange-800 focus:ring-4 focus:ring-orange-100'
                                         : 'border-blue-200 bg-blue-50/50 text-blue-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
-                                }`}
+                                    }`}
                             />
                             <div className="mt-2 flex items-center justify-between px-1">
                                 <span className="font-montserrat text-[10px] font-semibold text-orange-600 uppercase">
@@ -275,13 +281,12 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                                         '⚠ 15 digits required'}
                                 </span>
                                 <span
-                                    className={`font-mono text-xs ${
-                                        searchData.hrn.length === MAX_LENGTH
+                                    className={`font-mono text-xs ${searchData.hrn.length === MAX_LENGTH
                                             ? 'text-green-600'
                                             : isHrnActive
-                                              ? 'text-orange-500'
-                                              : 'text-slate-400'
-                                    }`}
+                                                ? 'text-orange-500'
+                                                : 'text-slate-400'
+                                        }`}
                                 >
                                     {searchData.hrn.length} / {MAX_LENGTH}
                                 </span>
@@ -362,11 +367,10 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                             <button
                                 onClick={handleSearch}
                                 disabled={isSearchDisabled}
-                                className={`min-w-[160px] rounded-md px-6 py-3 font-montserrat text-xs font-normal text-white transition-all ${
-                                    isSearchDisabled
+                                className={`min-w-[160px] rounded-md px-6 py-3 font-montserrat text-xs font-normal text-white transition-all ${isSearchDisabled
                                         ? 'cursor-not-allowed bg-slate-300 opacity-60'
                                         : 'cursor-pointer bg-blue-800 shadow-md hover:bg-blue-700 active:scale-95'
-                                }`}
+                                    }`}
                             >
                                 {isLoading ? 'SEARCHING...' : 'SEARCH RECORDS'}
                             </button>
@@ -374,11 +378,10 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                                 onClick={handleClear}
                                 type="button"
                                 disabled={isClearDisabled}
-                                className={`rounded-md border px-6 py-3 font-montserrat text-xs font-normal transition-colors ${
-                                    isClearDisabled
+                                className={`rounded-md border px-6 py-3 font-montserrat text-xs font-normal transition-colors ${isClearDisabled
                                         ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300'
                                         : 'cursor-pointer border-slate-400 bg-white text-slate-500 hover:bg-slate-50'
-                                }`}
+                                    }`}
                             >
                                 CLEAR FILTERS
                             </button>
