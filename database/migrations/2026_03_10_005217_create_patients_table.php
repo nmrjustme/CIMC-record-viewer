@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('firstname', 50);
             $table->string('middlename', 50)->nullable();
             $table->string('lastname', 50);
+            $table->unsignedBigInteger('created_by');
             $table->timestamps();
         });
     }
