@@ -1,0 +1,713 @@
+{
+  "_app-layout-DKPyEJ6-.js": {
+    "file": "assets/app-layout-DKPyEJ6-.js",
+    "name": "app-layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-DlyfY8bn.js",
+      "_index-OAY9k2En.js",
+      "_index-BDqSilVs.js"
+    ]
+  },
+  "_app-logo-icon-CvPjcWLk.js": {
+    "file": "assets/app-logo-icon-CvPjcWLk.js",
+    "name": "app-logo-icon",
+    "imports": [
+      "resources/js/app.tsx"
+    ]
+  },
+  "_auth-layout-DM_0iVkG.js": {
+    "file": "assets/auth-layout-DM_0iVkG.js",
+    "name": "auth-layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-BDqSilVs.js"
+    ]
+  },
+  "_check-DTe-HqVl.js": {
+    "file": "assets/check-DTe-HqVl.js",
+    "name": "check",
+    "imports": [
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_dialog-BPhxWw0c.js": {
+    "file": "assets/dialog-BPhxWw0c.js",
+    "name": "dialog",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-layout-DKPyEJ6-.js",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_index-B5W82n74.js": {
+    "file": "assets/index-B5W82n74.js",
+    "name": "index",
+    "imports": [
+      "_index-BDqSilVs.js"
+    ]
+  },
+  "_index-BDqSilVs.js": {
+    "file": "assets/index-BDqSilVs.js",
+    "name": "index"
+  },
+  "_index-CL0xlWMs.js": {
+    "file": "assets/index-CL0xlWMs.js",
+    "name": "index",
+    "imports": [
+      "_index-BDqSilVs.js"
+    ]
+  },
+  "_index-CnrpOn05.js": {
+    "file": "assets/index-CnrpOn05.js",
+    "name": "index",
+    "imports": [
+      "_index-BDqSilVs.js"
+    ]
+  },
+  "_index-D0D8dW-c.js": {
+    "file": "assets/index-D0D8dW-c.js",
+    "name": "index",
+    "imports": [
+      "_index-BDqSilVs.js",
+      "_index-B5W82n74.js"
+    ]
+  },
+  "_index-DlyfY8bn.js": {
+    "file": "assets/index-DlyfY8bn.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_index-OAY9k2En.js": {
+    "file": "assets/index-OAY9k2En.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_input-DVCWfFAs.js": {
+    "file": "assets/input-DVCWfFAs.js",
+    "name": "input",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_input-error-cRn-GXhI.js": {
+    "file": "assets/input-error-cRn-GXhI.js",
+    "name": "input-error",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_label-BhTYSnLY.js": {
+    "file": "assets/label-BhTYSnLY.js",
+    "name": "label",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-OAY9k2En.js",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_layout-nG_DmR7k.js": {
+    "file": "assets/layout-nG_DmR7k.js",
+    "name": "layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-OAY9k2En.js",
+      "_app-layout-DKPyEJ6-.js",
+      "_index-BDqSilVs.js",
+      "_index-CnrpOn05.js"
+    ]
+  },
+  "_loader-circle-CNPFZqLl.js": {
+    "file": "assets/loader-circle-CNPFZqLl.js",
+    "name": "loader-circle",
+    "imports": [
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_spinner-B0Jhb22D.js": {
+    "file": "assets/spinner-B0Jhb22D.js",
+    "name": "spinner",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_loader-circle-CNPFZqLl.js"
+    ]
+  },
+  "_text-link-jsagl2-3.js": {
+    "file": "assets/text-link-jsagl2-3.js",
+    "name": "text-link",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js"
+    ]
+  },
+  "_transition-B-2pvHWP.js": {
+    "file": "assets/transition-B-2pvHWP.js",
+    "name": "transition",
+    "imports": [
+      "resources/js/app.tsx"
+    ]
+  },
+  "_use-two-factor-auth-DGaxcuoC.js": {
+    "file": "assets/use-two-factor-auth-DGaxcuoC.js",
+    "name": "use-two-factor-auth",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-CnrpOn05.js"
+    ]
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-600-normal.woff": {
+    "file": "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-600-normal.woff"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-600-normal.woff2": {
+    "file": "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-600-normal.woff2"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-ext-600-normal.woff": {
+    "file": "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-ext-600-normal.woff"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-ext-600-normal.woff2": {
+    "file": "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-cyrillic-ext-600-normal.woff2"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-latin-600-normal.woff": {
+    "file": "assets/montserrat-latin-600-normal-CdhFl4lI.woff",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-latin-600-normal.woff"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-latin-600-normal.woff2": {
+    "file": "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-latin-600-normal.woff2"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-latin-ext-600-normal.woff": {
+    "file": "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-latin-ext-600-normal.woff"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-latin-ext-600-normal.woff2": {
+    "file": "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-latin-ext-600-normal.woff2"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-vietnamese-600-normal.woff": {
+    "file": "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-vietnamese-600-normal.woff"
+  },
+  "node_modules/@fontsource/montserrat/files/montserrat-vietnamese-600-normal.woff2": {
+    "file": "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+    "src": "node_modules/@fontsource/montserrat/files/montserrat-vietnamese-600-normal.woff2"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DDR_wzBU.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.tsx": {
+    "file": "assets/app-DDq0gpZe.js",
+    "name": "app",
+    "src": "resources/js/app.tsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/auth/confirm-password.tsx",
+      "resources/js/pages/auth/forgot-password.tsx",
+      "resources/js/pages/auth/login.tsx",
+      "resources/js/pages/auth/register.tsx",
+      "resources/js/pages/auth/reset-password.tsx",
+      "resources/js/pages/auth/two-factor-challenge.tsx",
+      "resources/js/pages/auth/verify-email.tsx",
+      "resources/js/pages/clientsList.tsx",
+      "resources/js/pages/dashboard.tsx",
+      "resources/js/pages/settings/appearance.tsx",
+      "resources/js/pages/settings/password.tsx",
+      "resources/js/pages/settings/profile.tsx",
+      "resources/js/pages/settings/two-factor.tsx",
+      "resources/js/pages/welcome.tsx"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/confirm-password.tsx": {
+    "file": "assets/confirm-password-D5dhZuxk.js",
+    "name": "confirm-password",
+    "src": "resources/js/pages/auth/confirm-password.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_input-error-cRn-GXhI.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_spinner-B0Jhb22D.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-B5W82n74.js",
+      "_index-OAY9k2En.js",
+      "_loader-circle-CNPFZqLl.js",
+      "_index-BDqSilVs.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/forgot-password.tsx": {
+    "file": "assets/forgot-password-CIBZJBvQ.js",
+    "name": "forgot-password",
+    "src": "resources/js/pages/auth/forgot-password.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_input-error-cRn-GXhI.js",
+      "_text-link-jsagl2-3.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-BDqSilVs.js",
+      "_index-D0D8dW-c.js",
+      "_loader-circle-CNPFZqLl.js",
+      "_index-OAY9k2En.js",
+      "_index-B5W82n74.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/login.tsx": {
+    "file": "assets/login-Bqd1vUdo.js",
+    "name": "login",
+    "src": "resources/js/pages/auth/login.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_input-error-cRn-GXhI.js",
+      "_text-link-jsagl2-3.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-DlyfY8bn.js",
+      "_check-DTe-HqVl.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_spinner-B0Jhb22D.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-BDqSilVs.js",
+      "_index-D0D8dW-c.js",
+      "_index-OAY9k2En.js",
+      "_loader-circle-CNPFZqLl.js",
+      "_index-B5W82n74.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/register.tsx": {
+    "file": "assets/register-DKHitrrC.js",
+    "name": "register",
+    "src": "resources/js/pages/auth/register.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_input-error-cRn-GXhI.js",
+      "_text-link-jsagl2-3.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_spinner-B0Jhb22D.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-BDqSilVs.js",
+      "_index-OAY9k2En.js",
+      "_loader-circle-CNPFZqLl.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/reset-password.tsx": {
+    "file": "assets/reset-password-KXWz8ZTN.js",
+    "name": "reset-password",
+    "src": "resources/js/pages/auth/reset-password.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_input-error-cRn-GXhI.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_spinner-B0Jhb22D.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-D0D8dW-c.js",
+      "_index-OAY9k2En.js",
+      "_loader-circle-CNPFZqLl.js",
+      "_index-BDqSilVs.js",
+      "_index-B5W82n74.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/two-factor-challenge.tsx": {
+    "file": "assets/two-factor-challenge-BbnC8W84.js",
+    "name": "two-factor-challenge",
+    "src": "resources/js/pages/auth/two-factor-challenge.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_use-two-factor-auth-DGaxcuoC.js",
+      "_input-error-cRn-GXhI.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_input-DVCWfFAs.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-CnrpOn05.js",
+      "_index-BDqSilVs.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/auth/verify-email.tsx": {
+    "file": "assets/verify-email-Cu6jLeYw.js",
+    "name": "verify-email",
+    "src": "resources/js/pages/auth/verify-email.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_text-link-jsagl2-3.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_spinner-B0Jhb22D.js",
+      "_auth-layout-DM_0iVkG.js",
+      "_index-BDqSilVs.js",
+      "_index-CL0xlWMs.js",
+      "_loader-circle-CNPFZqLl.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/clientsList.tsx": {
+    "file": "assets/clientsList-B14LC3zX.js",
+    "name": "clientsList",
+    "src": "resources/js/pages/clientsList.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/dashboard.tsx": {
+    "file": "assets/dashboard-CwVOtmmg.js",
+    "name": "dashboard",
+    "src": "resources/js/pages/dashboard.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-layout-DKPyEJ6-.js",
+      "_index-BDqSilVs.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-DlyfY8bn.js",
+      "_index-OAY9k2En.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/settings/appearance.tsx": {
+    "file": "assets/appearance-DvbYoFeu.js",
+    "name": "appearance",
+    "src": "resources/js/pages/settings/appearance.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_layout-nG_DmR7k.js",
+      "_app-layout-DKPyEJ6-.js",
+      "_index-OAY9k2En.js",
+      "_index-BDqSilVs.js",
+      "_index-CnrpOn05.js",
+      "_index-DlyfY8bn.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/settings/password.tsx": {
+    "file": "assets/password-VtfNInUU.js",
+    "name": "password",
+    "src": "resources/js/pages/settings/password.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-BDqSilVs.js",
+      "_layout-nG_DmR7k.js",
+      "_input-error-cRn-GXhI.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_app-layout-DKPyEJ6-.js",
+      "_transition-B-2pvHWP.js",
+      "_index-OAY9k2En.js",
+      "_index-CnrpOn05.js",
+      "_index-DlyfY8bn.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/settings/profile.tsx": {
+    "file": "assets/profile-Cf6cnv79.js",
+    "name": "profile",
+    "src": "resources/js/pages/settings/profile.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-BDqSilVs.js",
+      "_layout-nG_DmR7k.js",
+      "_input-error-cRn-GXhI.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_dialog-BPhxWw0c.js",
+      "_input-DVCWfFAs.js",
+      "_label-BhTYSnLY.js",
+      "_app-layout-DKPyEJ6-.js",
+      "_index-CL0xlWMs.js",
+      "_transition-B-2pvHWP.js",
+      "_index-OAY9k2En.js",
+      "_index-CnrpOn05.js",
+      "_index-DlyfY8bn.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/settings/two-factor.tsx": {
+    "file": "assets/two-factor-4_eatuhB.js",
+    "name": "two-factor",
+    "src": "resources/js/pages/settings/two-factor.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_layout-nG_DmR7k.js",
+      "_app-logo-icon-CvPjcWLk.js",
+      "_index-CnrpOn05.js",
+      "_use-two-factor-auth-DGaxcuoC.js",
+      "_input-error-cRn-GXhI.js",
+      "_dialog-BPhxWw0c.js",
+      "_spinner-B0Jhb22D.js",
+      "_check-DTe-HqVl.js",
+      "_app-layout-DKPyEJ6-.js",
+      "_index-OAY9k2En.js",
+      "_index-BDqSilVs.js",
+      "_loader-circle-CNPFZqLl.js",
+      "_index-DlyfY8bn.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  },
+  "resources/js/pages/welcome.tsx": {
+    "file": "assets/welcome-C4pkL9qi.js",
+    "name": "welcome",
+    "src": "resources/js/pages/welcome.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-BDqSilVs.js"
+    ],
+    "css": [
+      "assets/app-DDR_wzBU.css"
+    ],
+    "assets": [
+      "assets/montserrat-cyrillic-ext-600-normal-BtBW-rpm.woff2",
+      "assets/montserrat-cyrillic-ext-600-normal-wReYPmz2.woff",
+      "assets/montserrat-cyrillic-600-normal-CQEPC0hM.woff2",
+      "assets/montserrat-cyrillic-600-normal-DUglwBrH.woff",
+      "assets/montserrat-vietnamese-600-normal-DKe6qT_E.woff2",
+      "assets/montserrat-vietnamese-600-normal-SJ-HTWuM.woff",
+      "assets/montserrat-latin-ext-600-normal-DSkTqI9L.woff2",
+      "assets/montserrat-latin-ext-600-normal-CSDhkhgS.woff",
+      "assets/montserrat-latin-600-normal-UVxSCcoG.woff2",
+      "assets/montserrat-latin-600-normal-CdhFl4lI.woff"
+    ]
+  }
+}
