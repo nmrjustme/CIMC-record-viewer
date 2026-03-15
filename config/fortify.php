@@ -73,7 +73,9 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    // 'home' => '/viewer/record-finder',
+    // 'home' => '/dashboard',
+    'home',
 
     /*
     |--------------------------------------------------------------------------
