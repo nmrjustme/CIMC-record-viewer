@@ -67,7 +67,7 @@ export default function Register() {
                         />
                         <InputError message={form.errors.email} />
                     </div>
-
+                    
                     {/* Role */}
                     <div className="grid gap-2">
                         <Label htmlFor="role">Role</Label>
@@ -78,7 +78,7 @@ export default function Register() {
                             onChange={(e) =>
                                 form.setData('role', e.target.value)
                             }
-                            className="rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            className="rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-black dark:bg-slate-900 dark:text-white"
                         >
                             <option value="" disabled>
                                 Select a role
