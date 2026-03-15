@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
 import Header from '@/components/header';
+import { Patient } from '@/types/patient';
 
-import { Patient, Props } from '@/types/patient';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/viewer/record-finder',
+    },
+];
+
+// Skeleton loader for table rows
 const SkeletonRow = () => (
     <tr className="animate-pulse">
         <td className="px-8 py-4">
@@ -21,11 +31,30 @@ const SkeletonRow = () => (
     </tr>
 );
 
-export default function RecordFinder({ patients = [], filters }: Props) {
+type Props = {
+    patients: Patient[];
+    filters?: {
+        first?: string;
+        last?: string;
+        mid?: string;
+        hrn?: string;
+    };
+    auth: {
+        user: {
+            id: number;
+            name: string;
+            email: string;
+            role: 'admin' | 'staff' | 'viewer';
+        };
+    };
+};
+
+export default function RecordFinder({ patients = [], filters, auth }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
     const [resultCount, setResultCount] = useState(0);
+    const isAdmin = auth.user.role === 'admin';
 
     const MAX_LENGTH = 15;
     const ZERO_STRING = '000000000';
@@ -37,14 +66,12 @@ export default function RecordFinder({ patients = [], filters }: Props) {
         hrn: filters?.hrn || '',
     });
 
-    // Helper: Check if any field has content
     const isAnyInputFilled =
         searchData.first.trim() !== '' ||
         searchData.last.trim() !== '' ||
         searchData.mid.trim() !== '' ||
         searchData.hrn.trim() !== '';
 
-    // Determine which section is active
     const isNameActive = searchData.first || searchData.last || searchData.mid;
     const isHrnActive = searchData.hrn.length > 0;
 
@@ -55,18 +82,16 @@ export default function RecordFinder({ patients = [], filters }: Props) {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Logic for Search Button: Disable if loading, if HRN is incomplete, OR if all empty
     const isSearchDisabled =
         isLoading ||
         (isHrnActive && searchData.hrn.length < MAX_LENGTH) ||
         !isAnyInputFilled;
 
-    // Logic for Clear Button: Disable if loading OR if already empty
     const isClearDisabled = isLoading || !isAnyInputFilled;
 
     const handleSearch = () => {
         if (isSearchDisabled) return;
-        
+
         setIsLoading(true);
         const finalHrn = searchData.hrn
             ? searchData.hrn.padStart(MAX_LENGTH, '0')
@@ -81,12 +106,10 @@ export default function RecordFinder({ patients = [], filters }: Props) {
 
         const filteredData = Object.entries(dataToSend).reduce(
             (acc, [key, value]) => {
-                if  (value !== '') {
-                    acc[key] = value
-                }
+                if (value !== '') acc[key] = value;
                 return acc;
             },
-            {} as any
+            {} as any,
         );
 
         router.get(`/viewer/record-finder`, filteredData, {
@@ -119,18 +142,19 @@ export default function RecordFinder({ patients = [], filters }: Props) {
         );
     };
 
-
-    return (
+    const pageContent = (
         <div className="relative min-h-screen bg-slate-100 font-sans text-slate-900">
             <Head title="Patient List" />
-            <Header />
+
+            {auth.user.role !== 'admin' && <Header />}
 
             {/* NOTIFICATION ALERT */}
             <div
-                className={`fixed top-24 right-8 z-50 transform transition-all duration-500 ${showNotification
+                className={`fixed top-24 right-8 z-50 transform transition-all duration-500 ${
+                    showNotification
                         ? 'translate-x-0 opacity-100'
                         : 'pointer-events-none translate-x-full opacity-0'
-                    }`}
+                }`}
             >
                 <div className="flex items-center gap-4 rounded-xl border border-blue-200 bg-white p-5 shadow-2xl shadow-blue-200/40">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200">
@@ -180,6 +204,7 @@ export default function RecordFinder({ patients = [], filters }: Props) {
             </div>
 
             <main className="mx-auto max-w-6xl p-8">
+                {/* SEARCH SECTION */}
                 <section className="mb-8 rounded-xl border border-slate-400 bg-white p-8">
                     <div className="mb-6 border-b border-slate-200 pb-4">
                         <h2 className="font-montserrat text-sm font-semibold text-slate-600 uppercase">
@@ -188,7 +213,7 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                     </div>
 
                     <div className="flex flex-col gap-8">
-                        {/* 1. HRN INPUT SECTION */}
+                        {/* HRN Input */}
                         <div
                             className={`w-full transition-opacity ${isNameActive ? 'opacity-40' : 'opacity-100'}`}
                         >
@@ -255,11 +280,12 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                                             hrn: val,
                                         });
                                 }}
-                                className={`w-full rounded-lg border px-4 py-4 font-mono text-2xl tracking-[0.2em] transition-all outline-none disabled:cursor-not-allowed disabled:bg-slate-100 ${isHrnActive &&
-                                        searchData.hrn.length < MAX_LENGTH
+                                className={`w-full rounded-lg border px-4 py-4 font-mono text-2xl tracking-[0.2em] transition-all outline-none disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                                    isHrnActive &&
+                                    searchData.hrn.length < MAX_LENGTH
                                         ? 'border-orange-300 bg-orange-50 text-orange-800 focus:ring-4 focus:ring-orange-100'
                                         : 'border-blue-200 bg-blue-50/50 text-blue-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
-                                    }`}
+                                }`}
                             />
                             <div className="mt-2 flex items-center justify-between px-1">
                                 <span className="font-montserrat text-[10px] font-semibold text-orange-600 uppercase">
@@ -268,96 +294,70 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                                         '⚠ 15 digits required'}
                                 </span>
                                 <span
-                                    className={`font-mono text-xs ${searchData.hrn.length === MAX_LENGTH
+                                    className={`font-mono text-xs ${
+                                        searchData.hrn.length === MAX_LENGTH
                                             ? 'text-green-600'
                                             : isHrnActive
-                                                ? 'text-orange-500'
-                                                : 'text-slate-400'
-                                        }`}
+                                              ? 'text-orange-500'
+                                              : 'text-slate-400'
+                                    }`}
                                 >
                                     {searchData.hrn.length} / {MAX_LENGTH}
                                 </span>
                             </div>
                         </div>
 
-                        {/* 2. PERSONAL INFO SECTION */}
+                        {/* PERSONAL INFO */}
                         <div
-                            className={`grid grid-cols-1 gap-4 border-t border-slate-200 pt-6 transition-opacity md:grid-cols-3 ${isHrnActive ? 'opacity-40' : 'opacity-100'}`}
+                            className={`grid grid-cols-1 gap-4 border-t border-slate-200 pt-6 transition-opacity md:grid-cols-3 ${
+                                isHrnActive ? 'opacity-40' : 'opacity-100'
+                            }`}
                         >
-                            <div>
-                                <label className="mb-1.5 block font-montserrat text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                                    Last Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={searchData.last}
-                                    disabled={isHrnActive}
-                                    placeholder={isHrnActive ? 'Disabled' : ''}
-                                    onChange={(e) =>
-                                        setSearchData({
-                                            ...searchData,
-                                            last: e.target.value.replace(
-                                                /[0-9]/g,
-                                                '',
-                                            ),
-                                        })
-                                    }
-                                    className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2.5 font-montserrat text-sm font-normal uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 disabled:cursor-not-allowed"
-                                />
-                            </div>
-                            <div>
-                                <label className="mb-1.5 block font-montserrat text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                                    First Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={searchData.first}
-                                    disabled={isHrnActive}
-                                    placeholder={isHrnActive ? 'Disabled' : ''}
-                                    onChange={(e) =>
-                                        setSearchData({
-                                            ...searchData,
-                                            first: e.target.value.replace(
-                                                /[0-9]/g,
-                                                '',
-                                            ),
-                                        })
-                                    }
-                                    className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2.5 font-montserrat text-sm font-normal uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 disabled:cursor-not-allowed"
-                                />
-                            </div>
-                            <div>
-                                <label className="mb-1.5 block font-montserrat text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                                    Middle Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={searchData.mid}
-                                    disabled={isHrnActive}
-                                    placeholder={isHrnActive ? 'Disabled' : ''}
-                                    onChange={(e) =>
-                                        setSearchData({
-                                            ...searchData,
-                                            mid: e.target.value.replace(
-                                                /[0-9]/g,
-                                                '',
-                                            ),
-                                        })
-                                    }
-                                    className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2.5 font-montserrat text-sm font-normal uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 disabled:cursor-not-allowed"
-                                />
-                            </div>
+                            {['last', 'first', 'mid'].map((field) => (
+                                <div key={field}>
+                                    <label className="mb-1.5 block font-montserrat text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                                        {field === 'last'
+                                            ? 'Last Name'
+                                            : field === 'first'
+                                              ? 'First Name'
+                                              : 'Middle Name'}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={
+                                            searchData[
+                                                field as keyof typeof searchData
+                                            ]
+                                        }
+                                        disabled={isHrnActive}
+                                        placeholder={
+                                            isHrnActive ? 'Disabled' : ''
+                                        }
+                                        onChange={(e) =>
+                                            setSearchData({
+                                                ...searchData,
+                                                [field]: e.target.value.replace(
+                                                    /[0-9]/g,
+                                                    '',
+                                                ),
+                                            })
+                                        }
+                                        className="w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2.5 font-montserrat text-sm font-normal uppercase outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 disabled:cursor-not-allowed"
+                                    />
+                                </div>
+                            ))}
                         </div>
 
-                        {/* 3. BUTTONS ACTION ROW */}
+                        {/* ACTION BUTTONS */}
                         <div className="flex items-center justify-start gap-3 pt-2">
                             <button
                                 onClick={handleSearch}
                                 disabled={isSearchDisabled}
-                                className={`min-w-[160px] rounded-md px-6 py-3 font-montserrat text-xs font-normal text-white transition-all ${isSearchDisabled
+                                className={`min-w-[160px] rounded-md px-6 py-3 font-montserrat text-xs font-normal text-white transition-all ${
+                                    isSearchDisabled
                                         ? 'cursor-not-allowed bg-slate-300 opacity-60'
                                         : 'cursor-pointer bg-blue-800 shadow-md hover:bg-blue-700 active:scale-95'
-                                    }`}
+                                }`}
                             >
                                 {isLoading ? 'SEARCHING...' : 'SEARCH RECORDS'}
                             </button>
@@ -365,10 +365,11 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                                 onClick={handleClear}
                                 type="button"
                                 disabled={isClearDisabled}
-                                className={`rounded-md border px-6 py-3 font-montserrat text-xs font-normal transition-colors ${isClearDisabled
+                                className={`rounded-md border px-6 py-3 font-montserrat text-xs font-normal transition-colors ${
+                                    isClearDisabled
                                         ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-300'
                                         : 'cursor-pointer border-slate-400 bg-white text-slate-500 hover:bg-slate-50'
-                                    }`}
+                                }`}
                             >
                                 CLEAR FILTERS
                             </button>
@@ -376,7 +377,7 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                     </div>
                 </section>
 
-                {/* RESULTS TABLE SECTION */}
+                {/* RESULTS TABLE */}
                 <section className="overflow-hidden rounded-xl border border-slate-400 bg-white">
                     <div className="border-b border-slate-200 bg-slate-50/50 px-8 py-4">
                         <h3 className="font-montserrat text-sm font-semibold text-slate-600 uppercase">
@@ -451,5 +452,11 @@ export default function RecordFinder({ patients = [], filters }: Props) {
                 </section>
             </main>
         </div>
+    );
+
+    return isAdmin ? (
+        <AppLayout breadcrumbs={breadcrumbs}>{pageContent}</AppLayout>
+    ) : (
+        pageContent
     );
 }

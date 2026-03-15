@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\patients;
 use App\Models\patientsRecord;
+use Illuminate\Support\Facades\Auth;
 
 class patientsController extends Controller
 {
@@ -24,6 +25,10 @@ class patientsController extends Controller
             // Ensuring an empty array is sent if no data exists to prevent .map() errors
             'patients' => $query->latest()->get() ?? [],
             'filters' => $request->only(['first', 'last', 'mid', 'hrn']),
+            'currentUser' => [
+                'id' => Auth::id(),
+                'role' => Auth::user()->role, // Make sure your users table has a 'role' column
+            ],
         ]);
     }
 
@@ -54,4 +59,36 @@ class patientsController extends Controller
             'patient' => $patient
         ]);
     }
+
+    // Show create patient form
+    public function create()
+    {
+        $patients = patients::withCount('records')->latest()->get(); // fetch patients
+
+        return Inertia::render('admin/addPatient', [
+            'patients' => $patients,
+            'flash' => [
+                'success' => session('success')
+            ],
+        ]);
+    }
+
+    // Store new patient
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'firstname' => 'required|string|max:50',
+            'lastname' => 'required|string|max:50',
+            'middlename' => 'nullable|string|max:50',
+            'hrn' => 'required|string|unique:patients,hrn', // if you use HRN as unique identifier
+        ]);
+
+        // Add created_by automatically
+        $validated['created_by'] = Auth::id();
+
+        patients::create($validated);
+
+        return redirect()->route('patients.create')->with('success', 'Patient added successfully!');
+    }
+
 }

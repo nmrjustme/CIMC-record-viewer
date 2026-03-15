@@ -9,13 +9,32 @@ Route::inertia('/', 'welcome', [
 ])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+    //Public Records
+    Route::prefix('/viewer')->name('patients.')->group(function () {
+        Route::get('/record-finder', [patientsController::class, 'index'])->name('index');
+        Route::get('/{hrn}/folder', [patientsController::class, 'getFiles'])->name('folder');
+    });
+
+    // Admin Routes
+    Route::middleware(['role:admin'])->group(function () {
+        Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+        // Admin add patient page
+        Route::get('patients/create', [patientsController::class, 'create'])
+            ->name('patients.create');
+        // Store new patient
+        Route::post('patients', [patientsController::class, 'store'])
+            ->name('patients.store');
+
+    });
+
+    // Staff Routes
+    Route::middleware(['role:staff'])->group(function () {
+
+    });
 });
 
-Route::prefix('/viewer')->name('patients.')->group(function () {
-    Route::get('/record-finder', [patientsController::class, 'index']);
-    Route::get('/{hrn}/folder', [patientsController::class, 'getFiles']);
-});
 
 
 require __DIR__ . '/settings.php';
