@@ -56,6 +56,12 @@ export default function AddPatient({ patients, nationalities }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const patientData = patients.data || [];
 
+    const [showNotification, setShowNotification] = useState(false);
+    const [notificationType, setNotificationType] = useState<
+        'success' | 'error'
+    >('success');
+    const [notificationMessage, setNotificationMessage] = useState('');
+
     const initialFormState = {
         hrn: '',
         firstname: '',
@@ -93,22 +99,126 @@ export default function AddPatient({ patients, nationalities }: Props) {
         !formData.municipality ||
         !formData.province;
 
+    const handleClear = () => setFormData(initialFormState);
+
     const handleAddPatient = () => {
         if (isAddDisabled) return;
         setIsLoading(true);
 
         router.post('/patients', formData, {
-            onSuccess: () => setFormData(initialFormState),
-            onFinish: () => setIsLoading(false),
+            onSuccess: () => {
+                setFormData(initialFormState);
+
+                setNotificationType('success');
+                setNotificationMessage('Patient successfully added!');
+                setShowNotification(true);
+            },
+            onError: () => {
+                setNotificationType('error');
+                setNotificationMessage(
+                    'Failed to add patient. Please try again.',
+                );
+                setShowNotification(true);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+
+                // Auto-hide after 3 seconds
+                setTimeout(() => setShowNotification(false), 3000);
+            },
         });
     };
-
-    const handleClear = () => setFormData(initialFormState);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="relative min-h-screen bg-slate-100 font-sans text-slate-900">
                 <Head title="Add Patient" />
+                {/* NOTIFICATION ALERT */}
+                <div
+                    className={`fixed top-24 right-8 z-50 transform transition-all duration-500 ${
+                        showNotification
+                            ? 'translate-x-0 opacity-100'
+                            : 'pointer-events-none translate-x-full opacity-0'
+                    }`}
+                >
+                    <div
+                        className={`flex items-center gap-4 rounded-xl border p-5 shadow-2xl ${
+                            notificationType === 'success'
+                                ? 'border-green-200 bg-white shadow-green-200/40'
+                                : 'border-red-200 bg-white shadow-red-200/40'
+                        }`}
+                    >
+                        {/* ICON */}
+                        <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg ${
+                                notificationType === 'success'
+                                    ? 'bg-green-600 shadow-green-200'
+                                    : 'bg-red-600 shadow-red-200'
+                            }`}
+                        >
+                            {notificationType === 'success' ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                >
+                                    <path d="M20 6L9 17l-5-5" />
+                                </svg>
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            )}
+                        </div>
+
+                        {/* TEXT */}
+                        <div className="min-w-[160px]">
+                            <h4
+                                className={`text-[10px] font-black tracking-widest uppercase ${
+                                    notificationType === 'success'
+                                        ? 'text-green-600'
+                                        : 'text-red-600'
+                                }`}
+                            >
+                                {notificationType === 'success'
+                                    ? 'Success'
+                                    : 'Error'}
+                            </h4>
+                            <p className="font-montserrat text-sm font-semibold text-slate-700">
+                                {notificationMessage}
+                            </p>
+                        </div>
+
+                        {/* CLOSE BUTTON */}
+                        <button
+                            onClick={() => setShowNotification(false)}
+                            className="ml-2 text-slate-300 transition-colors hover:text-slate-500"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                            >
+                                <path d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
                 <main className="mx-auto max-w-6xl p-8">
                     {/* ADD PATIENT FORM */}

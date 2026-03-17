@@ -2,11 +2,20 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\patientsController;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+// Route::inertia('/', 'welcome', [
+//     'canRegister' => Features::enabled(Features::registration()),
+// ])->name('home');
+
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
+})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -19,6 +28,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
         Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+        Route::get('/register', function () {
+            return Inertia::render('auth/register');
+        })->name('register');
+        Route::post('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'store']);
 
         // Admin add patient page
         Route::get('patients/create', [patientsController::class, 'create'])

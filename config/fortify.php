@@ -75,6 +75,7 @@ return [
 
     // 'home' => '/viewer/record-finder',
     // 'home' => '/dashboard',
+    // 'home' => '/register',
     'home',
 
     /*

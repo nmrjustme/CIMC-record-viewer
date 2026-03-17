@@ -45,7 +45,7 @@ type Props = {
         current_page: number;
         last_page: number;
     };
-    
+
     filters?: {
         first?: string;
         last?: string;
