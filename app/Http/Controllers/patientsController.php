@@ -271,7 +271,7 @@ class patientsController extends Controller
         }
 
         $patients = $query->latest()->paginate(5)->withQueryString();
-        
+
         return Inertia::render('admin/addPatient', [
             'patients' => $patients,
             'filters' => $request->only(['search']), // Pass the search value back to the frontend
@@ -298,12 +298,12 @@ class patientsController extends Controller
             'nationality' => 'required|string|max:50',
             'birthdate' => 'required|date',
             'place_of_birth' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:20',
+            'phone_number' => 'nullable|string|max:20',
             'religion' => 'nullable|string|max:255',
 
             // patient_address table
-            'street' => 'nullable|string|max:100',
-            'barangay' => 'nullable|string|max:100',
+            'street' => 'required|string|max:100',
+            'barangay' => 'required|string|max:100',
             'municipality' => 'required|string|max:100',
             'province' => 'required|string|max:100',
         ]);
@@ -315,7 +315,7 @@ class patientsController extends Controller
                 'firstname' => $validated['firstname'],
                 'middlename' => $validated['middlename'],
                 'lastname' => $validated['lastname'],
-                'created_by' => auth()->id(),
+                'created_by' => Auth::id(),
             ]);
 
             // 2. Create Patient Info
