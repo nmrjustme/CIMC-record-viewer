@@ -24,10 +24,10 @@ class patientsController extends Controller
             ->when($request->filled('last'), fn($q) => $q->where('lastname', 'like', "%{$request->last}%"))
             ->when($request->filled('mid'), fn($q) => $q->where('middlename', 'like', "%{$request->mid}%"))
             ->when($request->filled('hrn'), fn($q) => $q->where('hrn', 'like', "%{$request->hrn}%"));
-        
+
 
         $patients = $query->latest()->paginate(5)->withQueryString();
-        
+
         return Inertia::render('clientsList', [
             'patients' => $patients,
             'filters' => $request->only(['first', 'last', 'mid', 'hrn']),
@@ -35,39 +35,46 @@ class patientsController extends Controller
                 'id' => Auth::id(),
                 'role' => Auth::user()->role,
             ],
+
         ]);
+    }
+
+    public function initFolder(Request $request)
+    {
+        session(['active_hrn' => $request->hrn]);
+
+        // Capture the source from the request, default to 'search'
+        $source = $request->input('from', 'search');
+        session(['folder_source' => $source]);
+        
+        return redirect()->route('patients.folder');
     }
 
     public function getFiles(Request $request)
     {
-        $hrn = $request->input('hrn');
+        $hrn = $request->input('hrn') ?? session('active_hrn');
+
+        // Retrieve the source we saved in initFolder
+        $fromPage = session('folder_source', 'search');
+
+        if (!$hrn) {
+            return redirect()->route('patients.index')
+                ->with('error', 'Patient record not found or session expired.');
+        }
+
         $patient = patients::with(['information.address'])
             ->where('hrn', $hrn)
             ->firstOrFail();
-
-        // Paginate the records relationship
-        $paginatedRecords = $patient->records()
-            ->latest()
-            ->paginate(10); // Adjust number per page as needed
-
-        $paginatedRecords->getCollection()->transform(function ($record) {
-            $firstFile = $record->file->first();
-            return [
-                'id' => $record->id,
-                'file_name' => $record->record_type ?? 'Unnamed File',
-                'updated_at' => $record->updated_at,
-                'created_at' => $record->created_at,
-                'pdf_url' => $firstFile ? asset($firstFile->file_path) : null,
-                'file_count' => $record->file->count(),
-            ];
-        });
-
+        
+        $paginatedRecords = $patient->records()->latest()->paginate(10);
+        
         return Inertia::render('PatientFolder', [
             'patient' => $patient,
-            'records' => $paginatedRecords
+            'records' => $paginatedRecords,
+            'fromPage' => $fromPage // Pass it here!
         ]);
     }
-    
+
     // Show create patient form
     public function create(Request $request)
     {
