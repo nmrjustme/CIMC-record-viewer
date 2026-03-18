@@ -47,7 +47,6 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
     const isStaff = auth.user.role === 'staff';
     const canUseDark = isAdmin || isStaff;
 
-    // THEME GUARD: If not admin/staff, force-remove dark mode from the document
     useEffect(() => {
         if (!canUseDark) {
             document.documentElement.classList.remove('dark');
@@ -65,9 +64,18 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
         hrn: filters?.hrn || '',
     });
 
-    const isAnyInputFilled = Object.values(searchData).some(val => val.trim() !== '');
+    // Validation Logic
     const isNameActive = !!(searchData.first || searchData.last || searchData.mid);
     const isHrnActive = searchData.hrn.length > 0;
+    
+    // Search is enabled IF:
+    // 1. We are searching by HRN and it is exactly 15 digits
+    // 2. OR We are searching by Name and at least one name field is filled
+    const isSearchDisabled = isLoading || (
+        isHrnActive 
+            ? searchData.hrn.length !== MAX_LENGTH 
+            : !isNameActive
+    );
 
     const handleCopy = () => {
         if (isNameActive) return;
@@ -77,7 +85,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
     };
 
     const handleSearch = () => {
-        if (isLoading || !isAnyInputFilled) return;
+        if (isSearchDisabled) return;
         setIsLoading(true);
         const finalHrn = searchData.hrn ? searchData.hrn.padStart(MAX_LENGTH, '0') : '';
         const dataToSend = { ...searchData, hrn: finalHrn };
@@ -112,7 +120,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
             {!isAdmin && <Header />}
             
             <div className={`fixed top-4 right-4 md:top-24 md:right-8 z-50 transform transition-all duration-500 ${showNotification ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-full opacity-0'}`}>
-                <div className="flex items-center gap-4 rounded border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)] p-4 shadow-xl">
+                <div className="flex items-center gap-4 rounded border border-[var(--patients-border)] bg-[var(--patients-section-bg)] p-4 shadow-xl">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--patients-accent)] text-white dark:text-black shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     </div>
@@ -124,8 +132,8 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
             </div>
 
             <main className="mx-auto max-w-6xl p-4 md:p-8">
-                <section className="mb-6 rounded-lg border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)] p-4 md:p-8">
-                    <div className="mb-6 border-b border-[var(--patients-sidebar-border)] pb-4">
+                <section className="mb-6 rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)] p-4 md:p-8">
+                    <div className="mb-6 border-b border-[var(--patients-border)] pb-4">
                         <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--patients-muted)]">Patient Records</h2>
                     </div>
 
@@ -137,7 +145,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                     onClick={handleCopy} 
                                     type="button" 
                                     disabled={isNameActive} 
-                                    className="flex items-center gap-1.5 rounded border border-[var(--patients-sidebar-border)] bg-[var(--patients-sidebar-bg)] px-2 py-1 text-[10px] font-mono transition-all hover:border-[var(--patients-accent)] disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-1.5 rounded border border-[var(--patients-border)] bg-[var(--patients-sidebar-bg)] px-2 py-1 text-[10px] font-mono transition-all hover:border-[var(--patients-accent)] disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                     <span>{ZERO_STRING}</span>
                                     {copied ? <span className="text-green-500">✓</span> : <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>}
@@ -150,11 +158,17 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                 value={searchData.hrn}
                                 disabled={isNameActive}
                                 onChange={(e) => setSearchData({ ...searchData, hrn: e.target.value.replace(/\D/g, '').slice(0, MAX_LENGTH) })}
-                                className="w-full bg-black/5 dark:bg-black/40 border-2 border-[var(--patients-sidebar-border)] px-4 py-3 font-mono text-xl md:text-2xl tracking-[0.2em] outline-none transition-all focus:border-[var(--patients-accent)] disabled:bg-zinc-100 dark:disabled:bg-zinc-900"
+                                className="w-full bg-black/5 dark:bg-black/40 border-2 border-[var(--patients-border)] px-4 py-3 font-mono text-xl md:text-2xl tracking-[0.2em] outline-none transition-all focus:border-[var(--patients-accent)] disabled:bg-zinc-100 dark:disabled:bg-zinc-900"
                             />
+                            {/* ADDED HRN DIGIT COUNTER */}
+                            <div className="mt-1 text-right">
+                                <span className={`text-[10px] font-bold ${searchData.hrn.length === 15 ? 'text-green-500' : 'text-[var(--patients-muted)]'}`}>
+                                    {searchData.hrn.length}/{MAX_LENGTH}
+                                </span>
+                            </div>
                         </div>
 
-                        <div className={`grid grid-cols-1 gap-4 border-t border-[var(--patients-sidebar-border)] pt-6 transition-opacity duration-300 md:grid-cols-3 ${isHrnActive ? 'opacity-40' : 'opacity-100'}`}>
+                        <div className={`grid grid-cols-1 gap-4 border-t border-[var(--patients-border)] pt-6 transition-opacity duration-300 md:grid-cols-3 ${isHrnActive ? 'opacity-40' : 'opacity-100'}`}>
                             {['last', 'first', 'mid'].map((field) => (
                                 <div key={field}>
                                     <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[var(--patients-muted)]">{field} Name</label>
@@ -164,16 +178,16 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                         value={searchData[field as keyof typeof searchData]}
                                         disabled={isHrnActive}
                                         onChange={(e) => setSearchData({ ...searchData, [field]: e.target.value.replace(/[0-9]/g, '') })}
-                                        className="w-full bg-[var(--patients-sidebar-bg)] border border-[var(--patients-sidebar-border)] px-3 py-2.5 text-sm uppercase outline-none transition-all focus:border-[var(--patients-accent)] disabled:bg-zinc-100 dark:disabled:bg-zinc-900"
+                                        className="w-full bg-[var(--patients-sidebar-bg)] border border-[var(--patients-border)] px-3 py-2.5 text-sm uppercase outline-none transition-all focus:border-[var(--patients-accent)] disabled:bg-zinc-100 dark:disabled:bg-zinc-900 shadow-[var(--input-shadow)]"
                                     />
                                 </div>
                             ))}
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                             <button
                                 onClick={handleSearch}
-                                disabled={isLoading || !isAnyInputFilled}
+                                disabled={isSearchDisabled}
                                 className="w-full sm:min-w-[180px] bg-[var(--patients-accent)] px-6 py-3 text-xs font-black uppercase tracking-widest text-white dark:text-black transition-all hover:brightness-90 active:scale-95 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {isLoading ? 'Searching...' : 'Search Records'}
@@ -181,19 +195,19 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                             <button 
                                 onClick={handleClear} 
                                 type="button" 
-                                disabled={isLoading || !isAnyInputFilled}
-                                className="w-full sm:w-auto px-6 py-3 text-xs font-bold uppercase border border-[var(--patients-sidebar-border)] text-[var(--patients-muted)] hover:text-[var(--patients-text)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                disabled={isLoading || (!isHrnActive && !isNameActive)}
+                                className="w-full sm:w-auto px-6 py-3 text-xs font-bold uppercase border border-[var(--patients-border)] text-[var(--patients-muted)] hover:text-[var(--patients-text)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                             >
                                 Clear Filters
                             </button>
                         </div>
                     </div>
                 </section>
-
-                <section className="overflow-hidden rounded-lg border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)]">
+                
+                <section className="overflow-hidden rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)]">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-black/5 dark:bg-black/40 text-[10px] font-black uppercase tracking-widest text-[var(--patients-muted)] border-b border-[var(--patients-sidebar-border)]">
+                            <thead className="bg-black/5 dark:bg-black/40 text-[10px] font-black uppercase tracking-widest text-[var(--patients-muted)] border-b border-[var(--patients-border)]">
                                 <tr>
                                     <th className="px-8 py-4">HRN</th>
                                     <th className="px-8 py-4">Patient Name</th>
@@ -201,7 +215,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                     <th className="px-8 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[var(--patients-sidebar-border)]">
+                            <tbody className="divide-y divide-[var(--patients-border)]">
                                 {isLoading ? <SkeletonRow /> : patientData.map((p) => (
                                     <tr key={p.id} className="transition-colors hover:bg-black/5 dark:hover:bg-white/5">
                                         <td className="px-8 py-5 font-mono text-sm text-[var(--patients-accent)]">{p.hrn}</td>
@@ -211,8 +225,9 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                         </td>
                                         <td className="px-8 py-5 text-right">
                                             <button
-                                            onClick={() => router.post(`/viewer/folder`, { hrn: p.hrn })}
-                                                className="inline-block cursor-pointer border border-[var(--patients-sidebar-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black"
+                                            onClick={() => router.post(`/viewer/folder`, { hrn: p.hrn, from: 'search' })}
+                                            
+                                                className="inline-block cursor-pointer border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black"
                                                 >
                                                 View Folder
                                             </button>
@@ -224,7 +239,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                     </div>
 
                     {/* PAGINATION FOOTER */}
-                    <div className="flex flex-col md:flex-row items-center justify-between border-t border-[var(--patients-sidebar-border)] bg-black/5 dark:bg-black/40 px-8 py-4 gap-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between border-t border-[var(--patients-border)] bg-black/5 dark:bg-black/40 px-8 py-4 gap-4">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--patients-muted)]">
                             Page {patients.current_page} of {patients.last_page} — {patients.total} total
                         </div>
@@ -241,7 +256,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                         link.active
                                             ? 'bg-[var(--patients-accent)] text-white dark:text-black shadow-md'
                                             : link.url
-                                                ? 'border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)] text-[var(--patients-text)] hover:border-[var(--patients-accent)]'
+                                                ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-text)] hover:border-[var(--patients-accent)]'
                                                 : 'cursor-not-allowed text-[var(--patients-muted)] opacity-50'
                                     }`}
                                 />

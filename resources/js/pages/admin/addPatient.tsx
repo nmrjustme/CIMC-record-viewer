@@ -4,6 +4,7 @@ import { Patient } from '@/types/patient';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
+
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Add Patient', href: '/patients/create' },
 ];
@@ -124,7 +125,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
     const labelClass =
         'mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-[var(--patients-muted)]';
     const inputClass =
-        'w-full bg-[var(--patients-sidebar-bg)] border border-[var(--patients-sidebar-border)] px-3 py-2.5 text-sm uppercase outline-none transition-all focus:border-[var(--patients-accent)] disabled:bg-zinc-100 dark:disabled:bg-zinc-900 text-[var(--patients-text)]';
+        'w-full bg-[var(--patients-sidebar-bg)] border border-[var(--patients-border)] px-3 py-2.5 text-sm uppercase outline-none transition-all focus:border-[var(--patients-accent)] disabled:bg-zinc-100 dark:disabled:bg-zinc-900 text-[var(--patients-text)]';
 
     const pageContent = (
         <div className="relative min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
@@ -133,7 +134,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
             <div
                 className={`fixed top-4 right-4 z-50 transform transition-all duration-500 md:top-24 md:right-8 ${showNotification ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-full opacity-0'}`}
             >
-                <div className="flex items-center gap-4 rounded border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)] p-4 shadow-xl">
+                <div className="flex items-center gap-4 rounded border border-[var(--patients-border)] bg-[var(--patients-section-bg)] p-4 shadow-xl">
                     <div
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-lg dark:text-black ${notificationType === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
                     >
@@ -158,13 +159,13 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
             </div>
 
             <main className="mx-auto max-w-6xl p-4 md:p-8">
-                <section className="mb-6 rounded-lg border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)] p-4 md:p-8">
-                    <div className="mb-6 border-b border-[var(--patients-sidebar-border)] pb-4">
+                <section className="mb-6 rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)] p-4 md:p-8">
+                    <div className="mb-6 border-b border-[var(--patients-border)] pb-4">
                         <h2 className="text-xs font-bold tracking-widest text-[var(--patients-muted)] uppercase">
                             Register New Patient
                         </h2>
                     </div>
-
+                    
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                         <div className="md:col-span-1">
                             <label className={labelClass}>HRN (15 Digits)</label>
@@ -179,7 +180,8 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                         hrn: e.target.value.replace(/\D/g, '').slice(0, 15),
                                     })
                                 }
-                                className={`${inputClass} font-mono tracking-[0.1em]`}
+                                className={`${inputClass} font-mono tracking-[0.1em] shadow-[var(--input-shadow)]`}
+                                
                             />
                             <div className="mt-1 text-right">
                                 <span
@@ -200,11 +202,10 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
-                                            // Blocks numbers by replacing anything not a letter, space, dot, or hyphen
                                             [field]: e.target.value.replace(/[^a-zA-Z\s.-]/g, ''),
                                         })
                                     }
-                                    className={inputClass}
+                                    className={`${inputClass} shadow-[var(--input-shadow)]`}
                                 />
                             </div>
                         ))}
@@ -214,7 +215,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                             <select
                                 value={formData.sex}
                                 onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             >
                                 <option value="">Select Sex</option>
                                 <option value="Male">Male</option>
@@ -227,7 +228,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 type="date"
                                 value={formData.birthdate}
                                 onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
                         <div>
@@ -235,7 +236,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                             <select
                                 value={formData.civil_status}
                                 onChange={(e) => setFormData({ ...formData, civil_status: e.target.value })}
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             >
                                 <option value="">Select Status</option>
                                 <option value="Single">Single</option>
@@ -253,7 +254,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 list="nats"
                                 value={formData.nationality}
                                 onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                             <datalist id="nats">
                                 {nationalities.map((n) => (
@@ -268,7 +269,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 type="text"
                                 value={formData.place_of_birth}
                                 onChange={(e) => setFormData({ ...formData, place_of_birth: e.target.value })}
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
                         <div>
@@ -283,7 +284,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                         phone_number: e.target.value.replace(/[^0-9+\- ]/g, ''),
                                     })
                                 }
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
                         <div>
@@ -294,15 +295,14 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        // Blocks numbers for Religion field
                                         religion: e.target.value.replace(/[^a-zA-Z\s.-]/g, ''),
                                     })
                                 }
-                                className={inputClass}
+                                className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
 
-                        <div className="border-t border-[var(--patients-sidebar-border)] pt-6 md:col-span-4">
+                        <div className="border-t border-[var(--patients-border)] pt-6 md:col-span-4">
                             <h3 className="mb-4 text-[10px] font-bold tracking-widest text-[var(--patients-muted)] uppercase">
                                 Residential Address
                             </h3>
@@ -321,7 +321,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                                     [field]: e.target.value,
                                                 })
                                             }
-                                            className={inputClass}
+                                            className={`${inputClass} shadow-[var(--input-shadow)]`}
                                         />
                                     </div>
                                 ))}
@@ -339,17 +339,17 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                         </button>
                         <button
                             onClick={handleClear}
-                            className="w-full cursor-pointer border border-[var(--patients-sidebar-border)] px-6 py-3 text-xs font-bold text-[var(--patients-muted)] uppercase transition-colors hover:text-[var(--patients-text)] sm:w-auto"
+                            className="w-full cursor-pointer border border-[var(--patients-border)] px-6 py-3 text-xs font-bold text-[var(--patients-muted)] uppercase transition-colors hover:text-[var(--patients-text)] sm:w-auto"
                         >
                             Clear Form
                         </button>
                     </div>
                 </section>
 
-                <section className="overflow-hidden rounded-lg border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)]">
+                <section className="overflow-hidden rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)]">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="border-b border-[var(--patients-sidebar-border)] bg-black/5 text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase dark:bg-black/40">
+                            <thead className="border-b border-[var(--patients-border)] bg-black/5 text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase dark:bg-black/40">
                                 <tr>
                                     <th className="px-8 py-4">HRN</th>
                                     <th className="px-8 py-4">Patient Name</th>
@@ -357,7 +357,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                     <th className="px-8 py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[var(--patients-sidebar-border)]">
+                            <tbody className="divide-y divide-[var(--patients-border)]">
                                 {isLoading ? (
                                     <SkeletonRow />
                                 ) : (
@@ -376,8 +376,8 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                             </td>
                                             <td className="px-8 py-5 text-right">
                                                 <button
-                                                    onClick={() => router.post('/viewer/folder', { hrn: p.hrn })}
-                                                    className="inline-block cursor-pointer border border-[var(--patients-sidebar-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black">
+                                                    onClick={() => router.post('/viewer/folder', { hrn: p.hrn, from: 'add' })}
+                                                    className="inline-block cursor-pointer border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black">
                                                     View Folder
                                                 </button>
                                             </td>
@@ -386,6 +386,32 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* PAGINATION FOOTER */}
+                    <div className="flex flex-col md:flex-row items-center justify-between border-t border-[var(--patients-border)] bg-black/5 dark:bg-black/40 px-8 py-4 gap-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--patients-muted)]">
+                            Page {patients.current_page} of {patients.last_page} — {patients.total} total
+                        </div>
+
+                        <div className="flex flex-wrap justify-center gap-1">
+                            {patients.links.map((link, index) => (
+                                <Link
+                                    key={index}
+                                    href={link.url || '#'}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    preserveScroll
+                                    preserveState
+                                    className={`flex h-8 min-w-[32px] items-center justify-center rounded px-3 text-[10px] font-bold transition-all ${
+                                        link.active
+                                            ? 'bg-[var(--patients-accent)] text-white dark:text-black shadow-md'
+                                            : link.url
+                                                ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-text)] hover:border-[var(--patients-accent)]'
+                                                : 'cursor-not-allowed text-[var(--patients-muted)] opacity-50'
+                                    }`}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </section>
             </main>
