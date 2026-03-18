@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\patientsController;
 use Illuminate\Support\Facades\Auth;
@@ -29,10 +30,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
-        Route::get('/register', function () {
-            return Inertia::render('auth/register');
-        })->name('register');
-        Route::post('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'store']);
+
+        Route::get('/register', [RegisterController::class, 'index'])->name('register');
+        Route::post('/register', [RegisterController::class, 'store']);
+        Route::put('/users/{user}', [RegisterController::class, 'update']);
+        Route::delete('/users/{user}', [RegisterController::class, 'destroy']);
+        // Route::get('/register', function () {
+        //     return Inertia::render('auth/register');
+        // })->name('register');
 
         // Admin add patient page
         Route::get('patients/create', [patientsController::class, 'create'])
