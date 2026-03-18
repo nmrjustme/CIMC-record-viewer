@@ -67,7 +67,7 @@ class patientsController extends Controller
             'records' => $paginatedRecords
         ]);
     }
-
+    
     // Show create patient form
     public function create(Request $request)
     {

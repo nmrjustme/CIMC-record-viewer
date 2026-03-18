@@ -4,6 +4,7 @@ import { Patient } from '@/types/patient';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
+
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Add Patient', href: '/patients/create' },
 ];
@@ -200,7 +201,6 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
-                                            // Blocks numbers by replacing anything not a letter, space, dot, or hyphen
                                             [field]: e.target.value.replace(/[^a-zA-Z\s.-]/g, ''),
                                         })
                                     }
@@ -294,7 +294,6 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        // Blocks numbers for Religion field
                                         religion: e.target.value.replace(/[^a-zA-Z\s.-]/g, ''),
                                     })
                                 }
@@ -386,6 +385,32 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* PAGINATION FOOTER */}
+                    <div className="flex flex-col md:flex-row items-center justify-between border-t border-[var(--patients-sidebar-border)] bg-black/5 dark:bg-black/40 px-8 py-4 gap-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--patients-muted)]">
+                            Page {patients.current_page} of {patients.last_page} — {patients.total} total
+                        </div>
+
+                        <div className="flex flex-wrap justify-center gap-1">
+                            {patients.links.map((link, index) => (
+                                <Link
+                                    key={index}
+                                    href={link.url || '#'}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                    preserveScroll
+                                    preserveState
+                                    className={`flex h-8 min-w-[32px] items-center justify-center rounded px-3 text-[10px] font-bold transition-all ${
+                                        link.active
+                                            ? 'bg-[var(--patients-accent)] text-white dark:text-black shadow-md'
+                                            : link.url
+                                                ? 'border border-[var(--patients-sidebar-border)] bg-[var(--patients-section-bg)] text-[var(--patients-text)] hover:border-[var(--patients-accent)]'
+                                                : 'cursor-not-allowed text-[var(--patients-muted)] opacity-50'
+                                    }`}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </section>
             </main>
