@@ -527,33 +527,7 @@ export default function Register({ users }: RegisterProps) {
                     </DialogHeader>
 
                     <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            if (!selectedUser) return;
-
-                            // Use Inertia router.put with preserveState so modal doesn't close
-                            router.put(
-                                `/users/${selectedUser.id}`,
-                                editFormData,
-                                {
-                                    preserveScroll: true,
-                                    preserveState: true,
-                                    onSuccess: () => setOpenEditModal(false),
-                                    onError: () => {
-                                        // Show error notification if needed
-                                        setNotificationType('error');
-                                        setNotificationMessage(
-                                            'Failed to update user. Check current password.',
-                                        );
-                                        setShowNotification(true);
-                                        setTimeout(
-                                            () => setShowNotification(false),
-                                            4000,
-                                        );
-                                    },
-                                },
-                            );
-                        }}
+                        onSubmit={handleEditSubmit}
                         className="mt-2 space-y-4"
                     >
                         {/* Name */}

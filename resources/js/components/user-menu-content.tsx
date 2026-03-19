@@ -36,7 +36,7 @@ export function UserMenuContent({ user }: Props) {
 
             <DropdownMenuGroup>
                 {/* Register User */}
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"
                         href="/register"
@@ -46,7 +46,7 @@ export function UserMenuContent({ user }: Props) {
                         <UserPlus className="mr-2" />
                         Register User
                     </Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
 
                 {/* Settings */}
                 <DropdownMenuItem asChild>

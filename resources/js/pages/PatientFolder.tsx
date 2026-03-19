@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import Header from '@/components/header';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 
 // --- Interfaces ---
 interface Address {
@@ -60,7 +62,12 @@ type Props = {
     fromPage: 'search' | 'add';
 };
 
-export default function PatientFolder({ patient, records, auth, fromPage }: Props) {
+export default function PatientFolder({
+    patient,
+    records,
+    auth,
+    fromPage,
+}: Props) {
     const [selectedRecord, setSelectedRecord] = useState<FileRecord | null>(
         null,
     );
@@ -76,6 +83,10 @@ export default function PatientFolder({ patient, records, auth, fromPage }: Prop
             document.documentElement.classList.remove('dark');
         }
     }, [canUseDark]);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: "Patient's Folder", href: '/viewer/record-finder' },
+    ];
 
     // Functional Logic: Identify Latest File
     const allFilesOnPage = records.data || [];
@@ -102,10 +113,11 @@ export default function PatientFolder({ patient, records, auth, fromPage }: Prop
     const sectionTitle =
         'mb-4 text-[10px] font-black tracking-[0.2em] text-[var(--patients-accent)] uppercase';
 
-    return (
+    const pageContent = (
         <div className="min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title={`${patient.lastname}'s Records`} />
-            <Header />
+
+            {!isAdmin && <Header />}
 
             <main className="mx-auto max-w-6xl p-4 md:p-8">
                 {/* Navigation */}
@@ -459,5 +471,11 @@ export default function PatientFolder({ patient, records, auth, fromPage }: Prop
                 </div>
             )}
         </div>
+    );
+
+    return isAdmin ? (
+        <AppLayout breadcrumbs={breadcrumbs}>{pageContent}</AppLayout>
+    ) : (
+        pageContent
     );
 }
