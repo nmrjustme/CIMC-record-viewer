@@ -177,7 +177,7 @@ export default function PatientFolder({
                             </div>
 
                             <div className="flex flex-col items-start gap-3 md:items-end">
-                                <p className="font-mono text-xs tracking-widest text-[var(--patients-muted)] uppercase">
+                                <p className="font-mono text-lg tracking-widest text-[var(--patients-muted)] uppercase">
                                     HRN:{' '}
                                     <span className="font-bold text-[var(--patients-accent)]">
                                         {patient.hrn}
@@ -452,7 +452,7 @@ export default function PatientFolder({
                             onClick={() => setSelectedRecord(null)}
                             className="cursor-pointer bg-red-600 px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase transition-colors hover:bg-red-700"
                         >
-                            Close Viewer [X]
+                            Close
                         </button>
                     </div>
                     <div className="flex-1 bg-zinc-900">

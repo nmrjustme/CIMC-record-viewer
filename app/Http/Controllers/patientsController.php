@@ -46,7 +46,7 @@ class patientsController extends Controller
         // Capture the source from the request, default to 'search'
         $source = $request->input('from', 'search');
         session(['folder_source' => $source]);
-        
+
         return redirect()->route('patients.folder');
     }
 
@@ -65,9 +65,23 @@ class patientsController extends Controller
         $patient = patients::with(['information.address'])
             ->where('hrn', $hrn)
             ->firstOrFail();
-        
-        $paginatedRecords = $patient->records()->latest()->paginate(10);
-        
+
+        $paginatedRecords = $patient->records()
+            ->latest()
+            ->paginate(10);
+
+        $paginatedRecords->getCollection()->transform(function ($record) {
+            $firstFile = $record->file->first();
+            return [
+                'id' => $record->id,
+                'file_name' => $record->record_type ?? 'Unnamed File',
+                'updated_at' => $record->updated_at,
+                'created_at' => $record->created_at,
+                'pdf_url' => $firstFile ? asset($firstFile->file_path) : null,
+                'file_count' => $record->file->count(),
+            ];
+        });
+
         return Inertia::render('PatientFolder', [
             'patient' => $patient,
             'records' => $paginatedRecords,
