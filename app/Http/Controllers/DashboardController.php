@@ -38,23 +38,40 @@ class DashboardController extends Controller
                 'totalFiles' => PatientsRecordsFileModel::count() ?? 0,
                 'totalPages' => (int) RecordsPageModel::sum('total_pages') ?? 0,
             ],
-            'monthlyUploads' => $monthlyUploads, // Added this line
+
+            'monthlyUploads' => $monthlyUploads,
+
             'recentActivity' => patientsRecord::with(['patients', 'creator'])
                 ->latest()
                 ->take(5)
                 ->get()
                 ->map(fn($record) => [
-                    'patient_name' => $record->patients->firstname . ' ' . $record->patients->lastname,
-                    'record_type' => $record->record_type,
-                    'file_name' => $record->file_name,
+                    // ✅ IMPORTANT: Add ID for React key
+                    'id' => $record->id,
+
+                    // ✅ Safe relationship handling
+                    'patient_name' => $record->patients
+                        ? $record->patients->firstname . ' ' . $record->patients->lastname
+                        : 'Unknown Patient',
+
+                    'record_type' => $record->record_type ?? 'N/A',
+
+                    'file_name' => $record->file_name ?? 'No File',
+
                     'uploaded_by' => $record->creator->name ?? 'System',
-                    'created_at' => $record->created_at->diffForHumans(),
+
+                    // ✅ FIXED ERROR HERE
+                    'created_at' => $record->created_at?->diffForHumans() ?? 'No date',
                 ]),
+
             'distribution' => [
                 'bySex' => patientsInfo::select('sex as label', DB::raw('count(*) as value'))
-                    ->groupBy('sex')->get(),
+                    ->groupBy('sex')
+                    ->get(),
+
                 'byStatus' => patientsInfo::select('civil_status as label', DB::raw('count(*) as value'))
-                    ->groupBy('civil_status')->get(),
+                    ->groupBy('civil_status')
+                    ->get(),
             ],
         ]);
     }
