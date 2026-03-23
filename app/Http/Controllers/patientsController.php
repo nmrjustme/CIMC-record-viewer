@@ -27,7 +27,7 @@ class patientsController extends Controller
 
 
         $patients = $query->latest()->paginate(5)->withQueryString();
-
+        
         return Inertia::render('clientsList', [
             'patients' => $patients,
             'filters' => $request->only(['first', 'last', 'mid', 'hrn']),
@@ -35,7 +35,7 @@ class patientsController extends Controller
                 'id' => Auth::id(),
                 'role' => Auth::user()->role,
             ],
-
+        
         ]);
     }
 

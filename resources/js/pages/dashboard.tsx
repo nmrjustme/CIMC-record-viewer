@@ -10,6 +10,7 @@ import {
     BarChart3,
     TrendingUp,
 } from 'lucide-react';
+
 import {
     AreaChart,
     Area,

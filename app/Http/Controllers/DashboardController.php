@@ -60,7 +60,7 @@ class DashboardController extends Controller
                     'record_type' => $record->record_type ?? 'N/A',
 
                     'file_name' => $record->file_name ?? 'No File',
-
+                    
                     'uploaded_by' => $record->creator->name ?? 'System',
 
                     // ✅ FIXED ERROR HERE
