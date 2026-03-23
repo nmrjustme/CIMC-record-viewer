@@ -72,7 +72,7 @@ export default function PatientFolder({
         null,
     );
     const [isInfoOpen, setIsInfoOpen] = useState(false);
-    
+
     // Theme & Role Logic
     const isAdmin = auth.user.role === 'admin';
     const isStaff = auth.user.role === 'staff';
@@ -148,7 +148,8 @@ export default function PatientFolder({
                 {/* --- Unified Patient Section --- */}
                 <div className="mb-10 overflow-hidden rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)]">
                     <div className="border-b border-[var(--patients-border)] bg-black/10 p-6 md:p-8 dark:bg-black/40">
-                        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                        <div className="flex flex-col justify-between gap-6 md:flex-row">
+                            {/* LEFT: Names */}
                             <div className="flex flex-wrap gap-x-12 gap-y-6">
                                 {[
                                     {
@@ -176,14 +177,39 @@ export default function PatientFolder({
                                 ))}
                             </div>
 
-                            <div className="flex flex-col items-start gap-3 md:items-end">
+                            {/* RIGHT: HRN block */}
+                            <div className="flex flex-col items-end gap-1.5 text-right">
+                                {/* HRN */}
                                 <p className="font-mono text-lg tracking-widest text-[var(--patients-muted)] uppercase">
                                     HRN:{' '}
                                     <span className="font-bold text-[var(--patients-accent)]">
                                         {patient.hrn}
                                     </span>
                                 </p>
-                                <span className="inline-block px-4 py-1.5 text-[10px] font-black text-[var(--patients-accent)] uppercase">
+
+                                <div className="flex justify-center gap-6">
+                                    {isAdmin && (
+                                        <button
+                                            className={`${sectionTitle} flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition-all duration-150 hover:border-gray-500 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-800`}
+                                        >
+                                            <span className="font-bold text-[var(--patients-accent)]">
+                                                &gt;&gt;
+                                            </span>
+                                            <span>Add</span>
+                                        </button>
+                                    )}
+
+                                    <button
+                                        className={`${sectionTitle} flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition-all duration-150 hover:border-gray-500 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-800`}
+                                    >
+                                        <span className="font-bold text-[var(--patients-accent)]">
+                                            &gt;&gt;
+                                        </span>
+                                        <span>View More</span>
+                                    </button>
+                                </div>
+                                {/* Total Docs */}
+                                <span className="mt-1 px-4 text-[10px] font-black tracking-wide text-[var(--patients-accent)] uppercase opacity-80">
                                     {records.total} Total Documents
                                 </span>
                             </div>
@@ -374,11 +400,28 @@ export default function PatientFolder({
 
                 {/* --- ARCHIVE LIST --- */}
                 <section className="pb-20">
-                    <h3 className={sectionTitle}>
-                        Archive List{' '}
-                        {records.last_page > 1 &&
-                            `(Page ${records.current_page})`}
-                    </h3>
+                    {/* Add file Buttons */}
+                    <div className="flex items-center justify-between gap-4">
+                        <h3 className={sectionTitle}>
+                            Archive List{' '}
+                            {records.last_page > 1 &&
+                                `(Page ${records.current_page})`}
+                        </h3>
+                        {isAdmin && (
+                            <div className="flex items-center gap-4">
+                                <button
+                                    className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                >
+                                    Add PDF
+                                </button>
+                                <button
+                                    className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                >
+                                    Scan Record/Upload File
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
                         {otherFiles.length > 0 ? (
                             otherFiles.map((file) => (
