@@ -39,6 +39,11 @@ const mainNavItems: NavItem[] = [
         href: '/patients/create',
         icon: User,
     },
+    {
+        title: 'Activity Logs',
+        href: '/activity-logs',
+        icon: FolderGit2,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

@@ -6,6 +6,7 @@ use App\Http\Controllers\patientsController;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use App\Http\Controllers\ActivityLogsController;
 
 use App\Http\Controllers\DashboardController;
 // Route::inertia('/', 'welcome', [
@@ -50,6 +51,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Store new patient
         Route::post('patients', [patientsController::class, 'store'])
             ->name('patients.store');
+
+        Route::get('/activity-logs', [ActivityLogsController::class, 'logs'])->name('admin-logs');
     });
 
     // Staff Routes

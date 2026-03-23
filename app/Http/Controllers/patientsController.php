@@ -11,9 +11,11 @@ use Illuminate\Validation\Rule;
 use App\Models\patientsInfo;
 use App\Models\patientsAddress;
 use Illuminate\Support\Facades\DB;
+use App\Traits\Loggable;
 
 class patientsController extends Controller
 {
+    use Loggable;
 
     public function index(Request $request)
     {
@@ -25,9 +27,13 @@ class patientsController extends Controller
             ->when($request->filled('mid'), fn($q) => $q->where('middlename', 'like', "%{$request->mid}%"))
             ->when($request->filled('hrn'), fn($q) => $q->where('hrn', 'like', "%{$request->hrn}%"));
 
+        if ($request->anyFilled(['first', 'last', 'mid', 'hrn'])) {
+            $details = array_filter($request->only(['first', 'last', 'mid', 'hrn']));
+            $this->logActivity('SEARCH', "Searched patients with criteria: " . json_encode($details), 'Patients');
+        }
 
         $patients = $query->latest()->paginate(5)->withQueryString();
-        
+
         return Inertia::render('clientsList', [
             'patients' => $patients,
             'filters' => $request->only(['first', 'last', 'mid', 'hrn']),
@@ -35,7 +41,7 @@ class patientsController extends Controller
                 'id' => Auth::id(),
                 'role' => Auth::user()->role,
             ],
-        
+
         ]);
     }
 
@@ -65,6 +71,10 @@ class patientsController extends Controller
         $patient = patients::with(['information.address'])
             ->where('hrn', $hrn)
             ->firstOrFail();
+
+        if ($patient) {
+            $this->logActivity('VIEW', "Accessed folder for patient: {$patient->firstname} {$patient->lastname} (HRN: {$hrn})", 'Patient Records');
+        }
 
         $paginatedRecords = $patient->records()
             ->latest()
@@ -173,6 +183,12 @@ class patientsController extends Controller
                 'province' => $validated['province'],
             ]);
         });
+
+        $this->logActivity(
+            'CREATE',
+            "Registered new patient: {$validated['firstname']} {$validated['lastname']} (HRN: {$validated['hrn']})",
+            'Patient Management'
+        );
 
         return redirect()->route('patients.create')->with('success', 'Patient record created across all tables.');
     }

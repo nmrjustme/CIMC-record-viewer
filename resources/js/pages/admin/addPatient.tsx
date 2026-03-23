@@ -130,7 +130,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
     const pageContent = (
         <div className="relative min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title="Add Patient" />
-
+            
             <div
                 className={`fixed top-4 right-4 z-50 transform transition-all duration-500 md:top-24 md:right-8 ${showNotification ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-full opacity-0'}`}
             >

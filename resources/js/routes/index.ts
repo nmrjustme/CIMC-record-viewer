@@ -211,7 +211,7 @@ register.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     
     register.form = registerForm
 /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
 export const home = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -225,7 +225,7 @@ home.definition = {
 } satisfies RouteDefinition<["get","head"]>
 
 /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
 home.url = (options?: RouteQueryOptions) => {
@@ -233,7 +233,7 @@ home.url = (options?: RouteQueryOptions) => {
 }
 
 /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
 home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -241,7 +241,7 @@ home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     method: 'get',
 })
 /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
 home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -250,7 +250,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 })
 
     /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
     const homeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -259,7 +259,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     })
 
             /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
         homeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -267,7 +267,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             method: 'get',
         })
             /**
- * @see routes/web.php:15
+ * @see routes/web.php:16
  * @route '/'
  */
         homeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -283,7 +283,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     home.form = homeForm
 /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
 export const dashboard = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -298,7 +298,7 @@ dashboard.definition = {
 
 /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
 dashboard.url = (options?: RouteQueryOptions) => {
@@ -307,7 +307,7 @@ dashboard.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
 dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -316,7 +316,7 @@ dashboard.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
 dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -326,7 +326,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
     const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -336,7 +336,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
         dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -345,7 +345,7 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\DashboardController::dashboard
- * @see app/Http/Controllers/DashboardController.php:17
+ * @see app/Http/Controllers/DashboardController.php:21
  * @route '/dashboard'
  */
         dashboardForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -359,3 +359,81 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
     
     dashboard.form = dashboardForm
+/**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+export const adminLogs = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: adminLogs.url(options),
+    method: 'get',
+})
+
+adminLogs.definition = {
+    methods: ["get","head"],
+    url: '/activity-logs',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+adminLogs.url = (options?: RouteQueryOptions) => {
+    return adminLogs.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+adminLogs.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: adminLogs.url(options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+adminLogs.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: adminLogs.url(options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+    const adminLogsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: adminLogs.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+        adminLogsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: adminLogs.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\ActivityLogsController::adminLogs
+ * @see app/Http/Controllers/ActivityLogsController.php:11
+ * @route '/activity-logs'
+ */
+        adminLogsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: adminLogs.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    adminLogs.form = adminLogsForm

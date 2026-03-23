@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
 import Header from '@/components/header';
 import { Patient } from '@/types/patient';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { debounce } from 'lodash'; 
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: "Patient's Records", href: '/viewer/record-finder' },
@@ -76,7 +75,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
 
     const isSearchDisabled = isLoading || !isAnyFieldFilled;
 
-    // --- REUSABLE SEARCH FUNCTION ---
+    // --- SEARCH FUNCTION (Triggered only by button) ---
     const performSearch = (data: typeof searchData) => {
         setIsLoading(true);
         
@@ -108,32 +107,15 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
         });
     };
 
-    // --- DEBOUNCED AUTO-SEARCH ---
-    const debouncedSearch = useCallback(
-        debounce((newData) => {
-            // Feature: If all inputs are cleared via typing/backspace, refresh the list
-            const hasValues = Object.values(newData).some(val => val !== '');
-            if (!hasValues) {
-                handleClear();
-            } else {
-                performSearch(newData);
-            }
-        }, 300),
-        []
-    );
-
+    // --- INPUT HANDLERS (State updates only) ---
     const handleHrnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value.replace(/\D/g, '').slice(0, MAX_LENGTH);
-        const updatedData = { ...searchData, hrn: val };
-        setSearchData(updatedData);
-        debouncedSearch(updatedData);
+        setSearchData(prev => ({ ...prev, hrn: val }));
     };
 
     const handleNameChange = (field: string, value: string) => {
         const val = value.replace(/[0-9]/g, '');
-        const updatedData = { ...searchData, [field]: val };
-        setSearchData(updatedData);
-        debouncedSearch(updatedData);
+        setSearchData(prev => ({ ...prev, [field]: val }));
     };
 
     const pageContent = (
@@ -214,7 +196,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                             <button
                                 onClick={handleClear}
                                 type="button"
-                                disabled={isLoading || !isAnyFieldFilled}
+                                disabled={isLoading || (!isAnyFieldFilled && Object.values(filters || {}).every(v => !v))}
                                 className="w-full cursor-pointer border border-[var(--patients-border)] px-6 py-3 text-xs font-bold text-[var(--patients-muted)] uppercase transition-colors hover:text-[var(--patients-text)] disabled:cursor-not-allowed disabled:opacity-30 sm:w-auto"
                             >
                                 Clear Filters
@@ -241,23 +223,25 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                                         <SkeletonRow />
                                         <SkeletonRow />
                                     </>
-                                ) : patientData.map((p) => (
-                                    <tr key={p.id} className="transition-colors hover:bg-black/5 dark:hover:bg-white/5">
-                                        <td className="px-8 py-5 font-mono text-sm text-[var(--patients-accent)]">{p.hrn}</td>
-                                        <td className="px-8 py-5 text-sm font-bold uppercase">{p.lastname}, {p.firstname}</td>
-                                        <td className="hidden px-8 py-5 text-center md:table-cell">
-                                            <span className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">{p.records_count} PDF(s)</span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <button
-                                                onClick={() => router.post(`/viewer/folder`, { hrn: p.hrn, from: 'search' })}
-                                                className="inline-block cursor-pointer border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black"
-                                            >
-                                                View Folder
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                ) : (
+                                    patientData.map((p) => (
+                                        <tr key={p.id} className="transition-colors hover:bg-black/5 dark:hover:bg-white/5">
+                                            <td className="px-8 py-5 font-mono text-sm text-[var(--patients-accent)]">{p.hrn}</td>
+                                            <td className="px-8 py-5 text-sm font-bold uppercase">{p.lastname}, {p.firstname}</td>
+                                            <td className="hidden px-8 py-5 text-center md:table-cell">
+                                                <span className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">{p.records_count} PDF(s)</span>
+                                            </td>
+                                            <td className="px-8 py-5 text-right">
+                                                <button
+                                                    onClick={() => router.post(`/viewer/folder`, { hrn: p.hrn, from: 'search' })}
+                                                    className="inline-block cursor-pointer border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black"
+                                                >
+                                                    View Folder
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
