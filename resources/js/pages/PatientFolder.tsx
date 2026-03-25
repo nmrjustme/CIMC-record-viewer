@@ -219,19 +219,20 @@ export default function PatientFolder({
                                 </p>
 
                                 <div className="flex justify-center gap-6">
-                                    {isAdmin && (
-                                        <button
-                                            onClick={() =>
-                                                setIsAddHRNModalOpen(true)
-                                            }
-                                            className={`${sectionTitle} flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition-all duration-150 hover:border-gray-500 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-800`}
-                                        >
-                                            <span className="font-bold text-[var(--patients-accent)]">
-                                                &gt;&gt;
-                                            </span>
-                                            <span>Add</span>
-                                        </button>
-                                    )}
+                                    {isAdmin ||
+                                        (isStaff && (
+                                            <button
+                                                onClick={() =>
+                                                    setIsAddHRNModalOpen(true)
+                                                }
+                                                className={`${sectionTitle} flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition-all duration-150 hover:border-gray-500 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-800`}
+                                            >
+                                                <span className="font-bold text-[var(--patients-accent)]">
+                                                    &gt;&gt;
+                                                </span>
+                                                <span>Add</span>
+                                            </button>
+                                        ))}
 
                                     <button
                                         onClick={() => setIsHRNModalOpen(true)}
@@ -442,20 +443,21 @@ export default function PatientFolder({
                             {records.last_page > 1 &&
                                 `(Page ${records.current_page})`}
                         </h3>
-                        {isAdmin && (
-                            <div className="flex items-center gap-4">
-                                <button
-                                    className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
-                                >
-                                    Add PDF
-                                </button>
-                                <button
-                                    className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
-                                >
-                                    Scan Record/Upload File
-                                </button>
-                            </div>
-                        )}
+                        {isAdmin ||
+                            (isStaff && (
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                    >
+                                        Add PDF
+                                    </button>
+                                    <button
+                                        className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                    >
+                                        Scan Record/Upload File
+                                    </button>
+                                </div>
+                            ))}
                     </div>
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
                         {otherFiles.length > 0 ? (
