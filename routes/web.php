@@ -10,6 +10,7 @@ use App\Http\Controllers\ActivityLogsController;
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatientHRNController;
+use App\Http\Controllers\PdfController;
 
 // Route::inertia('/', 'welcome', [
 //     'canRegister' => Features::enabled(Features::registration()),
@@ -39,6 +40,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin,staff'])->group(function () {
         Route::post('/patients/add-hrn', [patientsController::class, 'addHRN'])
                 ->name('patients.add-hrn');
+
+        Route::post('/pdf/create-blank', [PdfController::class, 'createBlankPdf'])
+                ->name('pdf.create-blank');
     });
 
     // Admin Routes
