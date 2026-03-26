@@ -80,12 +80,27 @@ export default function PatientFolder({
     const [selectedRecord, setSelectedRecord] = useState<FileRecord | null>(
         null,
     );
+
+    const [isOPDModalOpen, setOpenOPDModal] = useState(false);
+    const [isLabModalOpen, setOpenLabModal] = useState(false);
+    const [isRadioModalOpen, setOpenRadioModal] = useState(false);
+
     const [isInfoOpen, setIsInfoOpen] = useState(false);
     const [isAddHRNModalOpen, setIsAddHRNModalOpen] = useState(false);
-
     const [isHRNModalOpen, setIsHRNModalOpen] = useState(false);
-
     const otherHRNs = patient.hrns?.filter((h) => !h.is_primary) || [];
+
+    const [open, setOpen] = useState(false);
+    const [selected, setSelected] = useState('Add');
+
+    const handleSelect = (value) => {
+        setSelected(value);
+        setOpen(false);
+
+        if (value === 'OPD RECORD') setOpenOPDModal(true);
+        if (value === 'LABORATORY') setOpenLabModal(true);
+        if (value === 'RADIO') setOpenRadioModal(true);
+    };
 
     // Theme & Role Logic
     const isAdmin = auth.user.role === 'admin';
@@ -446,15 +461,49 @@ export default function PatientFolder({
                         </h3>
                         {(isAdmin || isStaff) && (
                             <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setOpen(!open)}
+                                        className={`${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                    >
+                                        {selected} ▾
+                                    </button>
+
+                                    {open && (
+                                        <div className="absolute left-0 z-50 mt-2 w-48 rounded border border-gray-300 bg-white shadow-md dark:border-gray-600 dark:bg-black">
+                                            <button
+                                                onClick={() =>
+                                                    handleSelect('OPD RECORD')
+                                                }
+                                                className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                                            >
+                                                OPD RECORD
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    handleSelect('LABORATORY')
+                                                }
+                                                className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                                            >
+                                                LABORATORY
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    handleSelect('RADIO')
+                                                }
+                                                className="block w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800"
+                                            >
+                                                RADIO
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 <button
                                     className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
                                 >
-                                    Add PDF
-                                </button>
-                                <button
-                                    className={` ${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
-                                >
-                                    Scan Record/Upload File
+                                    Upload File
                                 </button>
                             </div>
                         )}
