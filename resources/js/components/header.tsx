@@ -38,7 +38,7 @@ export default function Header() {
                 {/* Logout button for all users */}
                 <button
                     onClick={handleLogout}
-                    className="inline-flex items-center rounded bg-red-600 px-4 py-1 font-semibold text-white transition hover:bg-red-700"
+                    className="inline-flex items-center rounded bg-red-600 px-4 py-1 font-semibold text-white transition hover:bg-red-700 cursor-pointer"
                 >
                     Logout
                 </button>
