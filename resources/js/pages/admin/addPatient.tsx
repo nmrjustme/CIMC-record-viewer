@@ -3,7 +3,7 @@ import { Head, router, Link } from '@inertiajs/react';
 import { Patient } from '@/types/patient';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-
+import PatientTable from '@/pages/PatientTable';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Add Patient', href: '/patients/create' },
@@ -47,10 +47,12 @@ type Props = {
 export default function AddPatient({ patients, nationalities, auth }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
-    const [notificationType, setNotificationType] = useState<'success' | 'error'>('success');
+    const [notificationType, setNotificationType] = useState<
+        'success' | 'error'
+    >('success');
     const [notificationMessage, setNotificationMessage] = useState('');
-
-    const patientData = patients.data || [];
+    
+    const [openHrnDropdown, setOpenHrnDropdown] = useState<number | null>(null);
 
     const isAdmin = auth.user.role === 'admin';
     const isStaff = auth.user.role === 'staff';
@@ -112,7 +114,9 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
             },
             onError: () => {
                 setNotificationType('error');
-                setNotificationMessage('Failed to add patient. Please try again.');
+                setNotificationMessage(
+                    'Failed to add patient. Please try again.',
+                );
                 setShowNotification(true);
             },
             onFinish: () => {
@@ -130,7 +134,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
     const pageContent = (
         <div className="relative min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title="Add Patient" />
-            
+
             <div
                 className={`fixed top-4 right-4 z-50 transform transition-all duration-500 md:top-24 md:right-8 ${showNotification ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-full opacity-0'}`}
             >
@@ -139,11 +143,27 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-lg dark:text-black ${notificationType === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
                     >
                         {notificationType === 'success' ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                            >
                                 <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
                         ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                            >
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -151,9 +171,13 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                     </div>
                     <div>
                         <h4 className="text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
-                            {notificationType === 'success' ? 'Success' : 'Error'}
+                            {notificationType === 'success'
+                                ? 'Success'
+                                : 'Error'}
                         </h4>
-                        <p className="text-sm font-bold">{notificationMessage}</p>
+                        <p className="text-sm font-bold">
+                            {notificationMessage}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -165,10 +189,12 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                             Register New Patient
                         </h2>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                         <div className="md:col-span-1">
-                            <label className={labelClass}>HRN (15 Digits)</label>
+                            <label className={labelClass}>
+                                HRN (15 Digits)
+                            </label>
                             <input
                                 type="text"
                                 inputMode="numeric"
@@ -177,11 +203,12 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        hrn: e.target.value.replace(/\D/g, '').slice(0, 15),
+                                        hrn: e.target.value
+                                            .replace(/\D/g, '')
+                                            .slice(0, 15),
                                     })
                                 }
                                 className={`${inputClass} font-mono tracking-[0.1em] shadow-[var(--input-shadow)]`}
-                                
                             />
                             <div className="mt-1 text-right">
                                 <span
@@ -191,30 +218,48 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 </span>
                             </div>
                         </div>
-                        {['lastname', 'firstname', 'middlename'].map((field) => (
-                            <div key={field}>
-                                <label className={labelClass}>
-                                    {field === 'middlename' ? 'Middle Name' : field === 'lastname' ? 'Last Name' : 'First Name'}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData[field as keyof typeof formData]}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            [field]: e.target.value.replace(/[^a-zA-Z\s.-]/g, ''),
-                                        })
-                                    }
-                                    className={`${inputClass} shadow-[var(--input-shadow)]`}
-                                />
-                            </div>
-                        ))}
+                        {['lastname', 'firstname', 'middlename'].map(
+                            (field) => (
+                                <div key={field}>
+                                    <label className={labelClass}>
+                                        {field === 'middlename'
+                                            ? 'Middle Name'
+                                            : field === 'lastname'
+                                              ? 'Last Name'
+                                              : 'First Name'}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={
+                                            formData[
+                                                field as keyof typeof formData
+                                            ]
+                                        }
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                [field]: e.target.value.replace(
+                                                    /[^a-zA-Z\s.-]/g,
+                                                    '',
+                                                ),
+                                            })
+                                        }
+                                        className={`${inputClass} shadow-[var(--input-shadow)]`}
+                                    />
+                                </div>
+                            ),
+                        )}
 
                         <div>
                             <label className={labelClass}>Sex</label>
                             <select
                                 value={formData.sex}
-                                onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        sex: e.target.value,
+                                    })
+                                }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
                             >
                                 <option value="">Select Sex</option>
@@ -227,7 +272,12 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                             <input
                                 type="date"
                                 value={formData.birthdate}
-                                onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        birthdate: e.target.value,
+                                    })
+                                }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
@@ -235,7 +285,12 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                             <label className={labelClass}>Civil Status</label>
                             <select
                                 value={formData.civil_status}
-                                onChange={(e) => setFormData({ ...formData, civil_status: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        civil_status: e.target.value,
+                                    })
+                                }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
                             >
                                 <option value="">Select Status</option>
@@ -244,7 +299,9 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 <option value="Separated">Separated</option>
                                 <option value="Divorced">Divorced</option>
                                 <option value="Widowed">Widowed</option>
-                                <option value="Civil Partner">Civil Partner/Union</option>
+                                <option value="Civil Partner">
+                                    Civil Partner/Union
+                                </option>
                             </select>
                         </div>
                         <div>
@@ -253,7 +310,12 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 type="text"
                                 list="nats"
                                 value={formData.nationality}
-                                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        nationality: e.target.value,
+                                    })
+                                }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                             <datalist id="nats">
@@ -268,12 +330,19 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                             <input
                                 type="text"
                                 value={formData.place_of_birth}
-                                onChange={(e) => setFormData({ ...formData, place_of_birth: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        place_of_birth: e.target.value,
+                                    })
+                                }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
                         <div>
-                            <label className={labelClass}>Phone Number (Optional)</label>
+                            <label className={labelClass}>
+                                Phone Number (Optional)
+                            </label>
                             <input
                                 type="tel"
                                 placeholder="+63"
@@ -281,21 +350,29 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        phone_number: e.target.value.replace(/[^0-9+\- ]/g, ''),
+                                        phone_number: e.target.value.replace(
+                                            /[^0-9+\- ]/g,
+                                            '',
+                                        ),
                                     })
                                 }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
                             />
                         </div>
                         <div>
-                            <label className={labelClass}>Religion (Optional)</label>
+                            <label className={labelClass}>
+                                Religion (Optional)
+                            </label>
                             <input
                                 type="text"
                                 value={formData.religion}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        religion: e.target.value.replace(/[^a-zA-Z\s.-]/g, ''),
+                                        religion: e.target.value.replace(
+                                            /[^a-zA-Z\s.-]/g,
+                                            '',
+                                        ),
                                     })
                                 }
                                 className={`${inputClass} shadow-[var(--input-shadow)]`}
@@ -307,14 +384,25 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                                 Residential Address
                             </h3>
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                                {['street', 'barangay', 'municipality', 'province'].map((field) => (
+                                {[
+                                    'street',
+                                    'barangay',
+                                    'municipality',
+                                    'province',
+                                ].map((field) => (
                                     <div key={field}>
                                         <label className={labelClass}>
-                                            {field === 'street' ? 'Street (Purok)' : field}
+                                            {field === 'street'
+                                                ? 'Street (Purok)'
+                                                : field}
                                         </label>
                                         <input
                                             type="text"
-                                            value={formData[field as keyof typeof formData]}
+                                            value={
+                                                formData[
+                                                    field as keyof typeof formData
+                                                ]
+                                            }
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
@@ -333,7 +421,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                         <button
                             onClick={handleAddPatient}
                             disabled={isAddDisabled}
-                            className="w-full cursor-pointer bg-[var(--patients-accent)] px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:brightness-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-20 sm:min-w-[180px] dark:text-black"
+                            className="w-full cursor-pointer bg-[var(--patients-accent)] px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:brightness-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-20 sm:min-w-[180px]"
                         >
                             {isLoading ? 'Processing...' : 'Add Patient +'}
                         </button>
@@ -346,74 +434,13 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                     </div>
                 </section>
 
-                <section className="overflow-hidden rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)]">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="border-b border-[var(--patients-border)] bg-black/5 text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase dark:bg-black/40">
-                                <tr>
-                                    <th className="px-8 py-4">HRN</th>
-                                    <th className="px-8 py-4">Patient Name</th>
-                                    <th className="hidden px-8 py-4 text-center md:table-cell">Files</th>
-                                    <th className="px-8 py-4 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[var(--patients-border)]">
-                                {isLoading ? (
-                                    <SkeletonRow />
-                                ) : (
-                                    patientData.map((p) => (
-                                        <tr key={p.id} className="transition-colors hover:bg-black/5 dark:hover:bg-white/5">
-                                            <td className="px-8 py-5 font-mono text-sm text-[var(--patients-accent)]">
-                                                {p.hrn}
-                                            </td>
-                                            <td className="px-8 py-5 text-sm font-bold uppercase">
-                                                {p.lastname}, {p.firstname}
-                                            </td>
-                                            <td className="hidden px-8 py-5 text-center md:table-cell">
-                                                <span className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                                    {p.records_count ?? 0} PDF(s)
-                                                </span>
-                                            </td>
-                                            <td className="px-8 py-5 text-right">
-                                                <button
-                                                    onClick={() => router.post('/viewer/folder', { hrn: p.hrn, from: 'add' })}
-                                                    className="inline-block cursor-pointer border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold tracking-tighter uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-black">
-                                                    View Folder
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* PAGINATION FOOTER */}
-                    <div className="flex flex-col md:flex-row items-center justify-between border-t border-[var(--patients-border)] bg-black/5 dark:bg-black/40 px-8 py-4 gap-4">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--patients-muted)]">
-                            Page {patients.current_page} of {patients.last_page} — {patients.total} total
-                        </div>
-
-                        <div className="flex flex-wrap justify-center gap-1">
-                            {patients.links.map((link, index) => (
-                                <Link
-                                    key={index}
-                                    href={link.url || '#'}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                    preserveScroll
-                                    preserveState
-                                    className={`flex h-8 min-w-[32px] items-center justify-center rounded px-3 text-[10px] font-bold transition-all ${
-                                        link.active
-                                            ? 'bg-[var(--patients-accent)] text-white dark:text-black shadow-md'
-                                            : link.url
-                                                ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-text)] hover:border-[var(--patients-accent)]'
-                                                : 'cursor-not-allowed text-[var(--patients-muted)] opacity-50'
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </section>
+                <PatientTable
+                    patients={patients}
+                    isLoading={isLoading}
+                    openHrnDropdown={openHrnDropdown}
+                    setOpenHrnDropdown={setOpenHrnDropdown}
+                    SkeletonRow={SkeletonRow}
+                />
             </main>
         </div>
     );

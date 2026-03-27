@@ -88,7 +88,7 @@ export default function PatientFolder({
     const [isInfoOpen, setIsInfoOpen] = useState(false);
     const [isAddHRNModalOpen, setIsAddHRNModalOpen] = useState(false);
     const [isHRNModalOpen, setIsHRNModalOpen] = useState(false);
-    const otherHRNs = patient.hrns?.filter((h) => !h.is_primary) || [];
+    const otherHRNs = patient.hrns?.filter((h) => h.hrn !== patient.hrn) || [];
 
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState('Add');
@@ -235,7 +235,7 @@ export default function PatientFolder({
 
                             {/* RIGHT: HRN block */}
                             <div className="flex flex-col items-end gap-1.5 text-right">
-                                {/* HRN */}
+                                {/* HRN Display */}
                                 <p className="font-mono text-lg tracking-widest text-[var(--patients-muted)] uppercase">
                                     HRN:{' '}
                                     <span className="font-bold text-[var(--patients-accent)]">
@@ -243,34 +243,71 @@ export default function PatientFolder({
                                     </span>
                                 </p>
 
-                                {/* ADD & VIEW HRN BUTTON */}
-                                <div className="flex justify-center gap-6">
+                                {/* ENHANCED BUTTON GROUP */}
+                                <div className="flex items-center gap-2">
                                     {(isAdmin || isStaff) && (
                                         <button
                                             onClick={() =>
                                                 setIsAddHRNModalOpen(true)
                                             }
-                                            className={`${sectionTitle} flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition-all duration-150 hover:border-gray-500 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-800`}
+                                            className="hover:bg-opacity-90 flex cursor-pointer items-center gap-2 rounded-lg bg-[var(--patients-accent)] px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-95"
                                         >
-                                            <span className="font-bold text-[var(--patients-accent)]">
-                                                &gt;&gt;
-                                            </span>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2.5"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <line
+                                                    x1="12"
+                                                    y1="5"
+                                                    x2="12"
+                                                    y2="19"
+                                                ></line>
+                                                <line
+                                                    x1="5"
+                                                    y1="12"
+                                                    x2="19"
+                                                    y2="12"
+                                                ></line>
+                                            </svg>
                                             <span>Add</span>
                                         </button>
                                     )}
 
                                     <button
                                         onClick={() => setIsHRNModalOpen(true)}
-                                        className={`${sectionTitle} flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 transition-all duration-150 hover:border-gray-500 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:border-gray-400 dark:hover:bg-gray-800`}
+                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 transition-all hover:border-[var(--patients-accent)] hover:text-[var(--patients-accent)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-[var(--patients-accent)]"
                                     >
-                                        <span className="font-bold text-[var(--patients-accent)]">
-                                            &gt;&gt;
-                                        </span>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="3"
+                                            ></circle>
+                                        </svg>
                                         <span>View More</span>
                                     </button>
                                 </div>
+
                                 {/* Total Docs */}
-                                <span className="mt-1 px-4 text-[10px] font-black tracking-wide text-[var(--patients-accent)] uppercase opacity-80">
+                                <span className="mt-1 px-1 text-[10px] font-black tracking-widest text-[var(--patients-accent)] uppercase opacity-60">
                                     {records.total} Total Documents
                                 </span>
                             </div>
@@ -703,7 +740,7 @@ export default function PatientFolder({
 
                             <button
                                 onClick={() => setIsHRNModalOpen(false)}
-                                className="text-xs font-bold text-red-500 hover:underline"
+                                className="cursor-pointer text-xs font-bold text-red-500 hover:underline"
                             >
                                 Close
                             </button>
@@ -712,7 +749,7 @@ export default function PatientFolder({
                         {/* CURRENT HRN */}
                         <div className="mb-4">
                             <p className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                Main HRN
+                                Primary
                             </p>
                             <p className="font-mono text-sm font-black text-[var(--patients-accent)]">
                                 {patient.hrn}
@@ -721,15 +758,42 @@ export default function PatientFolder({
 
                         {/* LIST */}
                         <div className="space-y-2">
-                            {otherHRNs.length > 0 ? (
-                                otherHRNs.map((h) => (
-                                    <div
-                                        key={h.id}
-                                        className="flex items-center justify-between rounded border border-[var(--patients-border)] px-3 py-2 font-mono text-xs"
-                                    >
-                                        {h.hrn}
-                                    </div>
-                                ))
+                            {/* Use patient.hrns to show everything, or otherHRNs to show only secondary ones */}
+                            {patient.hrns && patient.hrns.length > 0 ? (
+                                [...patient.hrns]
+                                    .sort(
+                                        (a, b) =>
+                                            (b.hrn === patient.hrn ? 1 : 0) -
+                                            (a.hrn === patient.hrn ? 1 : 0),
+                                    )
+                                    .map((h) => {
+                                        const isMain = h.hrn === patient.hrn;
+                                        return (
+                                            <div
+                                                key={h.id}
+                                                className={`flex items-center justify-between rounded border px-3 py-2 font-mono text-xs transition-all ${
+                                                    isMain
+                                                        ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10 ring-1 ring-[var(--patients-accent)]/20'
+                                                        : 'border-[var(--patients-border)] bg-black/5 dark:bg-black/20'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={
+                                                        isMain
+                                                            ? 'font-black text-[var(--patients-accent)]'
+                                                            : ''
+                                                    }
+                                                >
+                                                    {h.hrn}
+                                                </span>
+                                                {isMain && (
+                                                    <span className="text-[8px] font-black text-[var(--patients-accent)] uppercase">
+                                                        Main
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })
                             ) : (
                                 <p className="text-[10px] text-[var(--patients-muted)] uppercase italic">
                                     No additional HRNs found
@@ -752,7 +816,7 @@ export default function PatientFolder({
 
                             <button
                                 onClick={() => setIsAddHRNModalOpen(false)}
-                                className="text-xs font-bold text-red-500 hover:underline"
+                                className="cursor-pointer text-xs font-bold text-red-500 hover:underline"
                             >
                                 Close
                             </button>
@@ -767,20 +831,41 @@ export default function PatientFolder({
                                 </label>
                                 <input
                                     type="text"
+                                    inputMode="numeric" // Shows numeric keypad on mobile
                                     value={data.hrn}
-                                    onChange={(e) =>
-                                        setData('hrn', e.target.value)
-                                    }
-                                    className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm focus:border-[var(--patients-accent)] focus:outline-none"
-                                    placeholder="Enter HRN..."
+                                    onChange={(e) => {
+                                        // 1. Remove any non-digit characters
+                                        const val = e.target.value.replace(
+                                            /\D/g,
+                                            '',
+                                        );
+
+                                        // 2. Limit to exactly 15 digits
+                                        if (val.length <= 15) {
+                                            setData('hrn', val);
+                                        }
+                                    }}
+                                    className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm transition-colors focus:border-[var(--patients-accent)] focus:outline-none"
+                                    placeholder="Enter 15-digit HRN..."
                                     required
                                 />
 
-                                {errors.hrn && (
-                                    <p className="mt-1 text-[10px] text-red-500">
-                                        {errors.hrn}
-                                    </p>
-                                )}
+                                {/* Visual counter (Optional but helpful) */}
+                                <div className="mt-1 flex justify-between">
+                                    {errors.hrn ? (
+                                        <p className="text-[10px] font-bold text-red-500 uppercase">
+                                            {errors.hrn}
+                                        </p>
+                                    ) : (
+                                        <div />
+                                    )}
+
+                                    <span
+                                        className={`text-[9px] font-medium uppercase ${data.hrn.length === 15 ? 'text-green-500' : 'text-gray-400'}`}
+                                    >
+                                        {data.hrn.length} / 15
+                                    </span>
+                                </div>
                             </div>
 
                             {/* ACTIONS */}
@@ -788,7 +873,7 @@ export default function PatientFolder({
                                 <button
                                     type="button"
                                     onClick={() => setIsAddHRNModalOpen(false)}
-                                    className="px-4 py-2 text-[10px] font-black text-gray-500 uppercase hover:underline"
+                                    className="px-4 py-2 text-[10px] font-black text-gray-500 uppercase hover:underline cursor-pointer"
                                 >
                                     Cancel
                                 </button>
@@ -796,7 +881,7 @@ export default function PatientFolder({
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black text-white uppercase transition hover:brightness-90 disabled:opacity-50 dark:text-black"
+                                    className="bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black text-white uppercase transition hover:brightness-90 disabled:opacity-50 cursor-pointer"
                                 >
                                     {processing ? 'Saving...' : 'Save HRN'}
                                 </button>

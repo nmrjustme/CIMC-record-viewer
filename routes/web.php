@@ -66,9 +66,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('patients', [patientsController::class, 'store'])
             ->name('patients.store');
 
-        Route::get('/activity-logs', [ActivityLogsController::class, 'logs'])->name('admin-logs');
+        Route::get('/activity-logs', [ActivityLogsController::class, 'logs']);
     });
-
+    
     // Staff Routes
     Route::middleware(['role:staff'])->group(function () {});
 });

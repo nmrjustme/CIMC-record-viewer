@@ -17,23 +17,35 @@ use App\Models\PatientHRN;
 class patientsController extends Controller
 {
     use Loggable;
+    private $paginate_number;
+
+    public function __construct()
+    {
+        $this->paginate_number = 10; // Default pagination number
+    }
 
     public function index(Request $request)
     {
         // 1. Build the base query
         $query = patients::query()
-            ->withCount('records');
+            ->withCount('records')
+            ->with('hrns'); // Eager load HRNs for display
+
         $query->when($request->filled('first'), fn($q) => $q->where('firstname', 'like', "%{$request->first}%"))
             ->when($request->filled('last'), fn($q) => $q->where('lastname', 'like', "%{$request->last}%"))
             ->when($request->filled('mid'), fn($q) => $q->where('middlename', 'like', "%{$request->mid}%"))
-            ->when($request->filled('hrn'), fn($q) => $q->where('hrn', 'like', "%{$request->hrn}%"));
+            ->when($request->filled('hrn'), function ($q) use ($request) {
+                // Search in both the main table and the related hrns table
+                $q->where('hrn', 'like', "%{$request->hrn}%")
+                    ->orWhereHas('hrns', fn($sub) => $sub->where('hrn', 'like', "%{$request->hrn}%"));
+            });
 
-        if ($request->anyFilled(['first', 'last', 'mid', 'hrn'])) {
-            $details = array_filter($request->only(['first', 'last', 'mid', 'hrn']));
-            $this->logActivity('SEARCH', "Searched patients with criteria: " . json_encode($details), 'Patients');
-        }
+        // if ($request->anyFilled(['first', 'last', 'mid', 'hrn'])) {
+        //     $details = array_filter($request->only(['first', 'last', 'mid', 'hrn']));
+        //     $this->logActivity('SEARCH', "Searched patients with criteria: " . json_encode($details), 'Patients');
+        // }
 
-        $patients = $query->latest()->paginate(5)->withQueryString();
+        $patients = $query->latest()->paginate($this->paginate_number)->withQueryString();
 
         return Inertia::render('clientsList', [
             'patients' => $patients,
@@ -60,7 +72,7 @@ class patientsController extends Controller
     public function getFiles(Request $request)
     {
         $hrn = $request->input('hrn') ?? session('active_hrn');
-
+        
         // Retrieve the source we saved in initFolder
         $fromPage = session('folder_source', 'search');
 
@@ -103,8 +115,8 @@ class patientsController extends Controller
     // Show create patient form
     public function create(Request $request)
     {
-        $query = patients::query()->withCount('records');
-
+        $query = patients::query()->withCount('records')->with('hrns');
+        
         // Add search functionality
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -114,8 +126,8 @@ class patientsController extends Controller
                     ->orWhere('hrn', 'like', "%{$search}%");
             });
         }
-
-        $patients = $query->latest()->paginate(5)->withQueryString();
+        
+        $patients = $query->latest()->paginate($this->paginate_number)->withQueryString();
 
         return Inertia::render('admin/addPatient', [
             'patients' => $patients,

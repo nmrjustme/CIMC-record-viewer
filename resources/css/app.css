@@ -151,7 +151,7 @@
     --patients-border: #353535;
     --patients-section-border: transparent; /* Use transparent border for sections in dark mode */
     --patients-section-bg: #171717;
-    --patients-accent: #ffffff;
+    --patients-accent: #3b82f6;
     --patients-text: #e5e5e5;
     --patients-muted: #a8a8a8;
 }

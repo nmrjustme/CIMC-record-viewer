@@ -23,9 +23,9 @@ class ActivityLogsController extends Controller
                     });
             });
         }
-
+        
         return Inertia::render('admin/AuditLogs', [
-            'logs' => $query->latest()->paginate(15)->withQueryString(),
+            'logs' => $query->latest()->paginate(10)->withQueryString(),
             'filters' => $request->only(['search']),
         ]);
     }

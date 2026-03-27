@@ -1,4 +1,5 @@
 export interface Patient {
+    hrns: PatientHrn[];
     id: number;
     hrn: string;
     firstname: string;
@@ -10,4 +11,10 @@ export interface Patient {
 export interface Props {
     patients: Patient[];
     filters: any;
+}
+
+export interface PatientHrn {
+    id: number;
+    hrn: string;
+    is_primary: number;
 }
