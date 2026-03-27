@@ -186,7 +186,7 @@ export default function PatientTable({
                                                         },
                                                     )
                                                 }
-                                                className="border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold uppercase transition-all hover:bg-[var(--patients-accent)] dark:hover:text-white cursor-pointer"
+                                                className="border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-white cursor-pointer "
                                             >
                                                 {variant === 'search'
                                                     ? 'View'
