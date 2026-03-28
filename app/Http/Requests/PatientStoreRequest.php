@@ -7,38 +7,34 @@ use Illuminate\Validation\Rule;
 
 class PatientStoreRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return $this->user()->role === 'admin';
+        return $this->user()->role === 'admin' || $this->user()->role === 'staff';
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
+        // If we are just adding an HRN, we only care about these two fields
+        if ($this->has('hrns') && !$this->has('firstname')) {
+            return [
+                'patient_id' => 'required|exists:patients,id',
+                'hrns'       => 'required|string|size:15', // Exact 15 digits
+            ];
+        }
+
+        // Full Patient Creation Rules
         return [
-            // patients table
             'firstname'      => 'required|string|max:50',
             'lastname'       => 'required|string|max:50',
             'middlename'     => 'nullable|string|max:50',
             'hrn'            => ['required', 'string', Rule::unique('patients', 'hrn')],
-
-            // patients_info table
             'sex'            => 'required|in:Male,Female',
             'civil_status'   => 'required|string|max:20',
             'nationality'    => 'required|string|max:50',
-            'birthdate'      => 'required|date',
+            'birthdate'      => 'required|string|max:50',
             'place_of_birth' => 'required|string|max:255',
             'phone_number'   => 'nullable|string|max:20',
             'religion'       => 'nullable|string|max:255',
-
-            // patient_address table
             'street'         => 'required|string|max:100',
             'barangay'       => 'required|string|max:100',
             'municipality'   => 'required|string|max:100',

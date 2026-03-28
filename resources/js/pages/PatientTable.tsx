@@ -104,13 +104,17 @@ export default function PatientTable({
                                                             }}
                                                             className="flex cursor-pointer items-center gap-1 text-[9px] font-bold tracking-tight text-[var(--patients-muted)] uppercase"
                                                         >
-                                                            <span>
-                                                                +{' '}
-                                                                {
-                                                                    otherHrns.length
-                                                                }{' '}
-                                                                Other HRNs
-                                                            </span>
+                                                            <div className="flex items-center gap-1">
+                                                                <span>
+                                                                    +{' '}
+                                                                    {
+                                                                        otherHrns.length
+                                                                    }
+                                                                </span>
+                                                                <p>
+                                                                    Other HRNs
+                                                                </p>
+                                                            </div>
                                                             <svg
                                                                 className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                                                                 width="10"
@@ -138,7 +142,7 @@ export default function PatientTable({
                                                                         Alternative
                                                                         HRNs
                                                                     </div>
-                                                                    
+
                                                                     {otherHrns.map(
                                                                         (
                                                                             extra: PatientHrn, // Use the imported PatientHrn type
@@ -186,7 +190,7 @@ export default function PatientTable({
                                                         },
                                                     )
                                                 }
-                                                className="border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-white cursor-pointer "
+                                                className="cursor-pointer border border-[var(--patients-border)] px-4 py-1.5 text-[10px] font-bold uppercase transition-all hover:bg-[var(--patients-accent)] hover:text-white dark:hover:text-white"
                                             >
                                                 {variant === 'search'
                                                     ? 'View'

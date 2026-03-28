@@ -24,7 +24,7 @@ class patientsController extends Controller
     {
         $this->paginate_number = 10; // Default pagination number
     }
-    
+
     public function index(Request $request)
     {
         // 1. Build the base query
@@ -47,7 +47,7 @@ class patientsController extends Controller
         // }
 
         $patients = $query->orderBy('created_at', 'desc')->paginate($this->paginate_number)->withQueryString();
-        
+
         return Inertia::render('clientsList', [
             'patients' => $patients,
             'filters' => $request->only(['first', 'last', 'mid', 'hrn']),
@@ -73,7 +73,7 @@ class patientsController extends Controller
     public function getFiles(Request $request)
     {
         $hrn = $request->input('hrn') ?? session('active_hrn');
-        
+
         // Retrieve the source we saved in initFolder
         $fromPage = session('folder_source', 'search');
 
@@ -117,7 +117,7 @@ class patientsController extends Controller
     public function create(Request $request)
     {
         $query = patients::query()->withCount('records')->with('hrns');
-        
+
         // Add search functionality
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -127,7 +127,7 @@ class patientsController extends Controller
                     ->orWhere('hrn', 'like', "%{$search}%");
             });
         }
-        
+
         $patients = $query->latest()->paginate($this->paginate_number)->withQueryString();
 
         return Inertia::render('admin/addPatient', [
@@ -144,7 +144,7 @@ class patientsController extends Controller
     public function store(PatientStoreRequest $request)
     {
         $validated = $request->validated();
-        
+
         DB::transaction(function () use ($validated) {
 
             // 1. Create Patient
@@ -191,18 +191,20 @@ class patientsController extends Controller
     {
         $validated = $request->validated();
         
+        // Create the HRN and manually handle the search index
         $hrn = PatientHRN::create([
             'patient_id' => $validated['patient_id'],
-            'hrn' => $validated['hrn'],
+            'hrn'        => $validated['hrns'], // Encrypted by Model Cast
+            // 'hrn_index'  => hash_hmac('sha256', $validated['hrn'], config('app.key')), // Searchable Hash
             'is_primary' => false,
         ]);
         
         $this->logActivity(
             'CREATE',
-            "Added new HRN ({$validated['hrn']}) to patient ID {$validated['patient_id']}",
+            "Added new HRN ({$validated['hrns']}) to patient ID {$validated['patient_id']}",
             'Patient HRN'
         );
-
+        
         return back()->with('success', 'New HRN added successfully.');
     }
 }

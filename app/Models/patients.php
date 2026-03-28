@@ -10,7 +10,7 @@ class patients extends Model
     protected $fillable = [
         'hrn', 'firstname', 'middlename', 'lastname', 'created_by'
     ];
-
+    
     public function records() {
         return $this->hasMany(patientsRecord::class, 'patients_id');
     }

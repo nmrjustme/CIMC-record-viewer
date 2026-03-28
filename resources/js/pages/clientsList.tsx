@@ -229,7 +229,7 @@ export default function RecordFinder({ patients, filters, auth }: Props) {
                             <button
                                 onClick={() => performSearch(searchData)}
                                 disabled={isSearchDisabled}
-                                className="flex w-full cursor-pointer items-center justify-center gap-2 bg-[var(--patients-accent)] px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:brightness-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-20 sm:min-w-[180px] dark:text-black"
+                                className="flex w-full cursor-pointer items-center justify-center gap-2 bg-[var(--patients-accent)] px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:brightness-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-20 sm:min-w-[180px]"
                             >
                                 {isLoading ? 'Searching...' : 'Search Records'}
                             </button>

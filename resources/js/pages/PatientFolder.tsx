@@ -81,9 +81,9 @@ export default function PatientFolder({
         null,
     );
 
-    const [isOPDModalOpen, setOpenOPDModal] = useState(false);
-    const [isLabModalOpen, setOpenLabModal] = useState(false);
-    const [isRadioModalOpen, setOpenRadioModal] = useState(false);
+    // const [isOPDModalOpen, setOpenOPDModal] = useState(false);
+    // const [isLabModalOpen, setOpenLabModal] = useState(false);
+    // const [isRadioModalOpen, setOpenRadioModal] = useState(false);
 
     const [isInfoOpen, setIsInfoOpen] = useState(false);
     const [isAddHRNModalOpen, setIsAddHRNModalOpen] = useState(false);
@@ -128,7 +128,7 @@ export default function PatientFolder({
 
     const { data, setData, post, processing, reset, errors } = useForm({
         patient_id: patient.id, // IMPORTANT: make sure patient.id exists in props
-        hrn: '',
+        hrns: '',
     });
 
     // Functional Logic: Identify Latest File
@@ -153,13 +153,12 @@ export default function PatientFolder({
     const submitHRN = (e: React.FormEvent) => {
         e.preventDefault();
 
-        (post('/patients/add-hrn'),
-            {
-                onSuccess: () => {
-                    reset();
-                    setIsAddHRNModalOpen(false);
-                },
-            });
+        post(`/patients/add-hrn`, {
+            onSuccess: () => {
+                reset();
+                setIsAddHRNModalOpen(false);
+            },
+        });
     };
 
     // Common UI Classes
@@ -175,7 +174,7 @@ export default function PatientFolder({
 
             {!isAdmin && <Header />}
 
-            <main className="mx-auto max-w-6xl p-4 md:p-8">
+            <main className="mx-auto w-full p-6">
                 {/* Navigation */}
                 <Link
                     href={
@@ -832,7 +831,7 @@ export default function PatientFolder({
                                 <input
                                     type="text"
                                     inputMode="numeric" // Shows numeric keypad on mobile
-                                    value={data.hrn}
+                                    value={data.hrns}
                                     onChange={(e) => {
                                         // 1. Remove any non-digit characters
                                         const val = e.target.value.replace(
@@ -842,7 +841,7 @@ export default function PatientFolder({
 
                                         // 2. Limit to exactly 15 digits
                                         if (val.length <= 15) {
-                                            setData('hrn', val);
+                                            setData('hrns', val);
                                         }
                                     }}
                                     className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm transition-colors focus:border-[var(--patients-accent)] focus:outline-none"
@@ -852,18 +851,18 @@ export default function PatientFolder({
 
                                 {/* Visual counter (Optional but helpful) */}
                                 <div className="mt-1 flex justify-between">
-                                    {errors.hrn ? (
+                                    {errors.hrns ? (
                                         <p className="text-[10px] font-bold text-red-500 uppercase">
-                                            {errors.hrn}
+                                            {errors.hrns}
                                         </p>
                                     ) : (
                                         <div />
                                     )}
 
                                     <span
-                                        className={`text-[9px] font-medium uppercase ${data.hrn.length === 15 ? 'text-green-500' : 'text-gray-400'}`}
+                                        className={`text-[9px] font-medium uppercase ${data.hrns.length === 15 ? 'text-green-500' : 'text-gray-400'}`}
                                     >
-                                        {data.hrn.length} / 15
+                                        {data.hrns.length} / 15
                                     </span>
                                 </div>
                             </div>
@@ -873,7 +872,7 @@ export default function PatientFolder({
                                 <button
                                     type="button"
                                     onClick={() => setIsAddHRNModalOpen(false)}
-                                    className="px-4 py-2 text-[10px] font-black text-gray-500 uppercase hover:underline cursor-pointer"
+                                    className="cursor-pointer px-4 py-2 text-[10px] font-black text-gray-500 uppercase hover:underline"
                                 >
                                     Cancel
                                 </button>
@@ -881,7 +880,7 @@ export default function PatientFolder({
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black text-white uppercase transition hover:brightness-90 disabled:opacity-50 cursor-pointer"
+                                    className="cursor-pointer bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black text-white uppercase transition hover:brightness-90 disabled:opacity-50"
                                 >
                                     {processing ? 'Saving...' : 'Save HRN'}
                                 </button>
