@@ -182,7 +182,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                 </div>
             </div>
 
-            <main className="mx-auto max-w-6xl p-4 md:p-8">
+            <main className="mx-auto w-full p-6">
                 <section className="mb-6 rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)] p-4 md:p-8">
                     <div className="mb-6 border-b border-[var(--patients-border)] pb-4">
                         <h2 className="text-xs font-bold tracking-widest text-[var(--patients-muted)] uppercase">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PatientStoreRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\patients;
@@ -23,7 +24,7 @@ class patientsController extends Controller
     {
         $this->paginate_number = 10; // Default pagination number
     }
-
+    
     public function index(Request $request)
     {
         // 1. Build the base query
@@ -45,8 +46,8 @@ class patientsController extends Controller
         //     $this->logActivity('SEARCH', "Searched patients with criteria: " . json_encode($details), 'Patients');
         // }
 
-        $patients = $query->latest()->paginate($this->paginate_number)->withQueryString();
-
+        $patients = $query->orderBy('created_at', 'desc')->paginate($this->paginate_number)->withQueryString();
+        
         return Inertia::render('clientsList', [
             'patients' => $patients,
             'filters' => $request->only(['first', 'last', 'mid', 'hrn']),
@@ -140,32 +141,12 @@ class patientsController extends Controller
     }
 
     // Store new patient
-    public function store(Request $request)
+    public function store(PatientStoreRequest $request)
     {
-        $validated = $request->validate([
-            // patients table
-            'firstname' => 'required|string|max:50',
-            'lastname' => 'required|string|max:50',
-            'middlename' => 'nullable|string|max:50',
-            'hrn' => 'required|string|unique:patients,hrn',
-
-            // patients_info table
-            'sex' => 'required|in:Male,Female',
-            'civil_status' => 'required|string|max:20',
-            'nationality' => 'required|string|max:50',
-            'birthdate' => 'required|date',
-            'place_of_birth' => 'required|string|max:255',
-            'phone_number' => 'nullable|string|max:20',
-            'religion' => 'nullable|string|max:255',
-
-            // patient_address table
-            'street' => 'required|string|max:100',
-            'barangay' => 'required|string|max:100',
-            'municipality' => 'required|string|max:100',
-            'province' => 'required|string|max:100',
-        ]);
-
+        $validated = $request->validated();
+        
         DB::transaction(function () use ($validated) {
+
             // 1. Create Patient
             $patient = patients::create([
                 'hrn' => $validated['hrn'],
@@ -206,19 +187,16 @@ class patientsController extends Controller
         return redirect()->route('patients.create')->with('success', 'Patient record created across all tables.');
     }
 
-    public function addHRN(Request $request)
+    public function addHRN(PatientStoreRequest $request)
     {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'hrn' => 'required|string|unique:patient_hrns,hrn',
-        ]);
-
+        $validated = $request->validated();
+        
         $hrn = PatientHRN::create([
             'patient_id' => $validated['patient_id'],
             'hrn' => $validated['hrn'],
             'is_primary' => false,
         ]);
-
+        
         $this->logActivity(
             'CREATE',
             "Added new HRN ({$validated['hrn']}) to patient ID {$validated['patient_id']}",

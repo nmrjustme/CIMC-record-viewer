@@ -60,7 +60,7 @@ export default function Dashboard({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Patient Records Dashboard" />
-
+            
             <div className="flex flex-1 flex-col gap-6 p-6">
                 {/* 1. Summary Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

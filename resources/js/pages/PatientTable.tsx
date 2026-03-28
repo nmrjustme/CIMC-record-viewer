@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, router } from '@inertiajs/react';
 import { Patient, PatientHrn } from '@/types/patient';
-
+import Pagination from '@/components/pagination';
 interface Props {
     patients: {
         data: Patient[];
@@ -210,25 +210,7 @@ export default function PatientTable({
                 </table>
             </div>
 
-            {/* Pagination Footer */}
-            <div className="flex flex-col items-center justify-between gap-4 border-t border-[var(--patients-border)] bg-black/5 px-8 py-4 md:flex-row dark:bg-black/40">
-                <div className="text-[10px] font-bold tracking-widest text-[var(--patients-muted)] uppercase">
-                    Page {patients.current_page} of {patients.last_page} —{' '}
-                    {patients.total} total
-                </div>
-                <div className="flex flex-wrap justify-center gap-1">
-                    {patients.links.map((link, index) => (
-                        <Link
-                            key={index}
-                            href={link.url || '#'}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                            preserveScroll
-                            preserveState
-                            className={`flex h-8 min-w-[32px] items-center justify-center rounded px-3 text-[10px] font-bold transition-all ${link.active ? 'bg-[var(--patients-accent)] text-white shadow-md dark:text-black' : 'border border-[var(--patients-border)] text-[var(--patients-text)] hover:border-[var(--patients-accent)]'}`}
-                        />
-                    ))}
-                </div>
-            </div>
+            <Pagination data={patients} />
         </section>
     );
 }
