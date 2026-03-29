@@ -18,7 +18,7 @@ trait Loggable
                   ->where('description', $description)
                   ->where('created_at', '>=', now()->subSeconds(5))
                   ->exists();
-
+            
             if (!$exists) {
                   return \App\Models\ActivityLog::create([
                         'user_id' => $userId,
@@ -26,6 +26,7 @@ trait Loggable
                         'description' => $description,
                         'module' => $module,
                         'ip_address' => Request::ip(),
+                        
                   ]);
             }
       }

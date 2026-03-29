@@ -1,4 +1,5 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { Head, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { ShieldCheck, Search } from 'lucide-react';
 import Pagination from '@/components/pagination';
@@ -9,7 +10,7 @@ interface Props {
         links: any[];
         current_page: number;
         last_page: number;
-        total: number; // Added total to match the reference
+        total: number;
     };
     filters: { search?: string };
 }
@@ -18,6 +19,19 @@ export default function AuditLogs({ logs, filters }: Props) {
     const { data, setData, get, processing } = useForm({
         search: filters.search || '',
     });
+    
+    useEffect(() => {
+        const interval = setInterval(() => {
+            // only: ['logs'] ensures we don't re-fetch shared layout data
+            router.reload({ 
+                only: ['logs'], 
+                preserveScroll: true,
+                preserveState: true 
+            } as any);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,7 +63,7 @@ export default function AuditLogs({ logs, filters }: Props) {
                             <input
                                 type="text"
                                 placeholder="Search logs..."
-                                className="w-full rounded-lg border border-[var(--patients-border)] bg-[var(--patients-section-bg)] py-2 pr-4 pl-10 text-sm transition-all placeholder:text-zinc-500 focus:border-indigo-500 focus:ring-indigo-500/20 focus:outline-none"
+                                className="w-full rounded-lg border border-zinc-200 bg-white py-2 pr-4 pl-10 text-sm transition-all placeholder:text-zinc-500 focus:border-indigo-500 focus:ring-indigo-500/20 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950"
                                 value={data.search}
                                 onChange={(e) => setData('search', e.target.value)}
                             />
@@ -65,9 +79,9 @@ export default function AuditLogs({ logs, filters }: Props) {
                     </form>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)]">
+                <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-black/5 text-[var(--patients-muted)] dark:bg-black/40 border-b border-[var(--patients-border)]">
+                        <thead className="bg-zinc-50 text-zinc-500 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
                             <tr>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest">User</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest">Action</th>
@@ -76,10 +90,10 @@ export default function AuditLogs({ logs, filters }: Props) {
                                 <th className="p-4 text-right text-[10px] font-black uppercase tracking-widest">Timestamp</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--patients-border)]">
+                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                             {logs.data.length > 0 ? (
                                 logs.data.map((log) => (
-                                    <tr key={log.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                    <tr key={log.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
                                         <td className="p-4">
                                             <div className="font-medium text-zinc-900 dark:text-zinc-100">{log.user?.name || 'System'}</div>
                                             <div className="text-xs text-zinc-500">{log.user?.role}</div>
@@ -101,7 +115,7 @@ export default function AuditLogs({ logs, filters }: Props) {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="p-20 text-center text-xs font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                    <td colSpan={5} className="p-20 text-center text-xs font-black tracking-widest text-zinc-400 uppercase">
                                         No logs found matching your criteria.
                                     </td>
                                 </tr>
@@ -109,7 +123,9 @@ export default function AuditLogs({ logs, filters }: Props) {
                         </tbody>
                     </table>
 
-                    <Pagination data={logs} />
+                    <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
+                        <Pagination data={logs} />
+                    </div>
                 </div>
             </div>
         </AppLayout>
