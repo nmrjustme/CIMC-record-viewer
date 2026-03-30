@@ -31,4 +31,10 @@ class patientsRecord extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function patient(): BelongsTo
+    {
+        // 'patients_id' is the foreign key in your table
+        return $this->belongsTo(patients::class, 'patients_id');
+    }
 }

@@ -10,11 +10,10 @@ class PatientsRecordsFileModel extends Model
     
     protected $fillable = [
         'records_id',
-        'file_name',
         'file_path',
         'total_pages'
     ];
-
+    
     public function records()
     {
         return $this->BelongsTo(patientsRecord::class, 'records_id', 'id');
@@ -22,7 +21,7 @@ class PatientsRecordsFileModel extends Model
 
     public function pages()
     {
-        return $this->BelongsTo(RecordsPageModel::class, 'file_id');
+        return $this->hasMany(RecordsPageModel::class, 'file_id');
     }
 
 }

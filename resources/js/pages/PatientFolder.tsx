@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import Header from '@/components/header';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { useForm } from '@inertiajs/react';
+import { MoreVertical, ImagePlus, Trash2 } from 'lucide-react';
 
 // --- Interfaces ---
 interface Address {
@@ -67,8 +67,9 @@ interface Patient {
 type Props = {
     patient: Patient;
     records: PaginatedRecords;
-    auth: { user: { role: string } };
+    auth: { user: { role: string; id: number } };
     fromPage: 'search' | 'add';
+    flash?: { pdf_path?: string };
 };
 
 export default function PatientFolder({
@@ -80,19 +81,11 @@ export default function PatientFolder({
     const [selectedRecord, setSelectedRecord] = useState<FileRecord | null>(
         null,
     );
-
-    // const [isOPDModalOpen, setOpenOPDModal] = useState(false);
-    // const [isLabModalOpen, setOpenLabModal] = useState(false);
-    // const [isRadioModalOpen, setOpenRadioModal] = useState(false);
-
     const [isInfoOpen, setIsInfoOpen] = useState(false);
     const [isAddHRNModalOpen, setIsAddHRNModalOpen] = useState(false);
     const [isHRNModalOpen, setIsHRNModalOpen] = useState(false);
-    const otherHRNs = patient.hrns?.filter((h) => h.hrn !== patient.hrn) || [];
-
     const [open, setOpen] = useState(false);
-    const [selected, setSelected] = useState('Add');
-
+    const [selected, setSelected] = useState('OPD RECORD');
     const [search, setSearch] = useState('');
     const [categories, setCategories] = useState([
         'OPD RECORD',
@@ -100,18 +93,137 @@ export default function PatientFolder({
         'RADIO',
     ]);
 
-    const handleSelect = (value) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [showNotification, setShowNotification] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
+    const [notificationType, setNotificationType] = useState<
+        'success' | 'error'
+    >('success');
+
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+    // --- Close menu on click outside ---
+    useEffect(() => {
+        const handleClickOutside = () => setOpenMenuId(null);
+        if (openMenuId !== null) {
+            window.addEventListener('click', handleClickOutside);
+        }
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, [openMenuId]);
+
+    const handleToggleMenu = (e: React.MouseEvent, id: number) => {
+        e.stopPropagation();
+        setOpenMenuId(openMenuId === id ? null : id);
+    };
+
+    // 1. Add these at the top of your component state
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [targetFileId, setTargetFileId] = useState<number | null>(null);
+
+    // 2. Update handleAddImage to trigger the file explorer
+    const handleAddImage = (fileId: number) => {
+        setTargetFileId(fileId);
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    // 3. Create the upload handler
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !targetFileId) return;
+
+        setIsLoading(true);
+        // Send as multipart/form-data
+        router.post(
+            `/pdf/upload-image/${targetFileId}`,
+            {
+                image: file,
+            },
+            {
+                forceFormData: true,
+                onSuccess: () => {
+                    setNotificationMessage('Image added and PDF updated!');
+                    setNotificationType('success');
+                    setShowNotification(true);
+                },
+                onError: () => {
+                    setNotificationMessage('Failed to upload image.');
+                    setNotificationType('error');
+                    setShowNotification(true);
+                },
+                onFinish: () => {
+                    setIsLoading(false);
+                    setTargetFileId(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                },
+            },
+        );
+    };
+
+    const handleDeleteRecord = (fileId: number, fileName: string) => {
+        if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
+            router.delete(`/records/${fileId}`, {
+                onSuccess: () => {
+                    setNotificationType('success');
+                    setNotificationMessage('Record deleted successfully');
+                    setShowNotification(true);
+                },
+                onError: () => {
+                    setNotificationType('error');
+                    setNotificationMessage('Failed to delete record');
+                    setShowNotification(true);
+                },
+            });
+        }
+    };
+
+    const handleSelect = (value: string) => {
         setSelected(value);
         setSearch(value);
         setOpen(false);
-
-        // OPTIONAL: save new category dynamically
         if (!categories.includes(value)) {
             setCategories([...categories, value]);
         }
     };
 
-    // Theme & Role Logic
+    const handleDownloadArchive = () => {
+        window.location.href = `/patients/${patient.id}/generate-archive-pdf`;
+    };
+
+    const handleCreateBlankPdf = () => {
+        setIsLoading(true);
+        router.post(
+            `/pdf/create-blank`,
+            {
+                category: selected,
+                records_id: patient.id,
+            },
+            {
+                onSuccess: (page) => {
+                    const flash = page.props.flash as { pdf_path?: string };
+                    if (flash?.pdf_path) {
+                        window.open(flash.pdf_path, '_blank');
+                    }
+                    setNotificationType('success');
+                    setNotificationMessage('PDF successfully created!');
+                    setShowNotification(true);
+                },
+                onError: (errors: any) => {
+                    setNotificationType('error');
+                    setNotificationMessage(
+                        errors.create_pdf || 'Failed to create PDF.',
+                    );
+                    setShowNotification(true);
+                },
+                onFinish: () => {
+                    setIsLoading(false);
+                    setTimeout(() => setShowNotification(false), 4000);
+                },
+            },
+        );
+    };
+
     const isAdmin = auth.user.role === 'admin';
     const isStaff = auth.user.role === 'staff';
     const canUseDark = isAdmin || isStaff;
@@ -127,11 +239,10 @@ export default function PatientFolder({
     ];
 
     const { data, setData, post, processing, reset, errors } = useForm({
-        patient_id: patient.id, // IMPORTANT: make sure patient.id exists in props
+        patient_id: patient.id,
         hrns: '',
     });
 
-    // Functional Logic: Identify Latest File
     const allFilesOnPage = records.data || [];
     const getLatestTime = (file: FileRecord) => {
         const created = new Date(file.created_at).getTime();
@@ -152,7 +263,6 @@ export default function PatientFolder({
 
     const submitHRN = (e: React.FormEvent) => {
         e.preventDefault();
-
         post(`/patients/add-hrn`, {
             onSuccess: () => {
                 reset();
@@ -161,21 +271,31 @@ export default function PatientFolder({
         });
     };
 
-    // Common UI Classes
     const labelClass =
         'text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase';
     const sectionTitle =
         'mb-4 text-[10px] font-black tracking-[0.2em] text-[var(--patients-accent)] uppercase';
 
-    console.log({ isAdmin, isStaff });
     const pageContent = (
         <div className="min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title={`${patient.lastname}'s Records`} />
-
             {!isAdmin && <Header />}
-
+            {/* Hidden File Input for Image Upload */}
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+            />
+            {showNotification && (
+                <div
+                    className={`fixed top-5 right-5 z-[200] rounded-md px-6 py-3 font-bold text-white shadow-lg transition-all ${notificationType === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
+                >
+                    {notificationMessage}
+                </div>
+            )}
             <main className="mx-auto w-full p-6">
-                {/* Navigation */}
                 <Link
                     href={
                         fromPage === 'add'
@@ -200,11 +320,9 @@ export default function PatientFolder({
                     {fromPage === 'add' ? 'Back to Add Page' : 'Back to Search'}
                 </Link>
 
-                {/* --- Unified Patient Section --- */}
                 <div className="mb-10 overflow-hidden rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)]">
                     <div className="border-b border-[var(--patients-border)] bg-black/10 p-6 md:p-8 dark:bg-black/40">
                         <div className="flex flex-col justify-between gap-6 md:flex-row">
-                            {/* LEFT: Names */}
                             <div className="flex flex-wrap gap-x-12 gap-y-6">
                                 {[
                                     {
@@ -232,24 +350,20 @@ export default function PatientFolder({
                                 ))}
                             </div>
 
-                            {/* RIGHT: HRN block */}
                             <div className="flex flex-col items-end gap-1.5 text-right">
-                                {/* HRN Display */}
                                 <p className="font-mono text-lg tracking-widest text-[var(--patients-muted)] uppercase">
                                     HRN:{' '}
                                     <span className="font-bold text-[var(--patients-accent)]">
                                         {patient.hrn}
                                     </span>
                                 </p>
-
-                                {/* ENHANCED BUTTON GROUP */}
                                 <div className="flex items-center gap-2">
                                     {(isAdmin || isStaff) && (
                                         <button
                                             onClick={() =>
                                                 setIsAddHRNModalOpen(true)
                                             }
-                                            className="hover:bg-opacity-90 flex cursor-pointer items-center gap-2 rounded-lg bg-[var(--patients-accent)] px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-95"
+                                            className="hover:bg-opacity-90 flex cursor-pointer items-center gap-2 rounded-lg bg-[var(--patients-accent)] px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-all active:scale-95"
                                         >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -278,10 +392,9 @@ export default function PatientFolder({
                                             <span>Add</span>
                                         </button>
                                     )}
-
                                     <button
                                         onClick={() => setIsHRNModalOpen(true)}
-                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 transition-all hover:border-[var(--patients-accent)] hover:text-[var(--patients-accent)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-[var(--patients-accent)]"
+                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 transition-all hover:border-[var(--patients-accent)] hover:text-[var(--patients-accent)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -304,8 +417,6 @@ export default function PatientFolder({
                                         <span>View More</span>
                                     </button>
                                 </div>
-
-                                {/* Total Docs */}
                                 <span className="mt-1 px-1 text-[10px] font-black tracking-widest text-[var(--patients-accent)] uppercase opacity-60">
                                     {records.total} Total Documents
                                 </span>
@@ -325,21 +436,16 @@ export default function PatientFolder({
                     <div
                         className={`grid grid-cols-1 transition-all duration-300 ease-in-out md:grid-cols-3 ${isInfoOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}
                     >
-                        {/* CONTACT & STATUS */}
                         <div className="flex flex-col border-b border-[var(--patients-border)] p-6 md:border-r md:border-b-0">
                             <h4
-                                className={
-                                    labelClass + ' mb-4 flex items-center gap-2'
-                                }
+                                className={`${labelClass} mb-4 flex items-center gap-2`}
                             >
                                 <div className="h-2 w-2 bg-[var(--patients-accent)]" />{' '}
                                 Contact & Status
                             </h4>
                             <div className="space-y-4">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                        Phone
-                                    </p>
+                                    <p className={labelClass}>Phone</p>
                                     <p className="font-mono text-sm font-black">
                                         {patient.information?.phone_number ||
                                             'UNLISTED'}
@@ -357,22 +463,16 @@ export default function PatientFolder({
                                 </div>
                             </div>
                         </div>
-
-                        {/* BIRTH & RELIGION */}
                         <div className="flex flex-col border-b border-[var(--patients-border)] p-6 md:border-r md:border-b-0">
                             <h4
-                                className={
-                                    labelClass + ' mb-4 flex items-center gap-2'
-                                }
+                                className={`${labelClass} mb-4 flex items-center gap-2`}
                             >
                                 <div className="h-2 w-2 bg-[var(--patients-accent)]" />{' '}
                                 Birth & Religion
                             </h4>
                             <div className="space-y-4">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                        Birthday
-                                    </p>
+                                    <p className={labelClass}>Birthday</p>
                                     <p className="text-sm font-black uppercase">
                                         {patient.information?.birthdate
                                             ? new Date(
@@ -386,9 +486,7 @@ export default function PatientFolder({
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                        Religion
-                                    </p>
+                                    <p className={labelClass}>Religion</p>
                                     <p className="text-sm font-bold text-[var(--patients-muted)] uppercase">
                                         {patient.information?.religion ||
                                             'None specified'}
@@ -396,13 +494,9 @@ export default function PatientFolder({
                                 </div>
                             </div>
                         </div>
-
-                        {/* ADDRESS */}
                         <div className="flex flex-col p-6">
                             <h4
-                                className={
-                                    labelClass + ' mb-4 flex items-center gap-2'
-                                }
+                                className={`${labelClass} mb-4 flex items-center gap-2`}
                             >
                                 <div className="h-2 w-2 bg-[var(--patients-accent)]" />{' '}
                                 Full Address
@@ -451,7 +545,6 @@ export default function PatientFolder({
                     </div>
                 </div>
 
-                {/* --- LATEST UPDATE SECTION --- */}
                 {latestFile && (
                     <section className="mb-12">
                         <h3 className={sectionTitle}>Most Recently Updated</h3>
@@ -467,7 +560,7 @@ export default function PatientFolder({
                                 </h4>
                                 <div className="mt-2 flex flex-col gap-y-1 sm:border-l-2 sm:border-[var(--patients-border)] sm:pl-4">
                                     <div className="flex items-center justify-center gap-x-2 text-[10px] font-black text-[var(--patients-muted)] uppercase sm:justify-start">
-                                        <span>Created:</span>
+                                        <span>Created:</span>{' '}
                                         <span className="font-mono">
                                             {new Date(
                                                 latestFile.created_at,
@@ -476,7 +569,7 @@ export default function PatientFolder({
                                     </div>
                                     <div className="flex items-center justify-center gap-x-2 text-[10px] font-black text-[var(--patients-accent)] uppercase sm:justify-start">
                                         <span className="h-1.5 w-1.5 animate-pulse bg-[var(--patients-accent)]" />
-                                        <span>Updated:</span>
+                                        <span>Updated:</span>{' '}
                                         <span className="font-mono">
                                             {new Date(
                                                 latestFile.updated_at,
@@ -495,9 +588,7 @@ export default function PatientFolder({
                     </section>
                 )}
 
-                {/* --- ARCHIVE LIST --- */}
                 <section className="pb-20">
-                    {/* Add file Buttons */}
                     <div className="flex items-center justify-between gap-4">
                         <h3 className={sectionTitle}>
                             Archive List{' '}
@@ -509,14 +600,12 @@ export default function PatientFolder({
                                 <div className="relative">
                                     <button
                                         onClick={() => setOpen(!open)}
-                                        className={`${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                        className={`${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white`}
                                     >
                                         {search || selected} ▾
                                     </button>
-
                                     {open && (
                                         <div className="absolute left-0 z-50 mt-2 w-64 rounded border border-gray-300 bg-white shadow-md dark:border-gray-600 dark:bg-black">
-                                            {/* Input field */}
                                             <input
                                                 type="text"
                                                 value={search}
@@ -526,8 +615,6 @@ export default function PatientFolder({
                                                 placeholder="Type or select..."
                                                 className="w-full border-b px-3 py-2 outline-none dark:bg-black"
                                             />
-
-                                            {/* Suggestions */}
                                             <div className="max-h-40 overflow-y-auto">
                                                 {categories
                                                     .filter((cat) =>
@@ -550,8 +637,6 @@ export default function PatientFolder({
                                                             {cat}
                                                         </button>
                                                     ))}
-
-                                                {/* If no match → allow adding */}
                                                 {search &&
                                                     !categories.includes(
                                                         search,
@@ -562,7 +647,7 @@ export default function PatientFolder({
                                                                     search,
                                                                 )
                                                             }
-                                                            className="block w-full px-4 py-2 text-left text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                                            className="block w-full px-4 py-2 text-left text-blue-500 hover:bg-gray-100"
                                                         >
                                                             Add "{search}"
                                                         </button>
@@ -571,69 +656,43 @@ export default function PatientFolder({
                                         </div>
                                     )}
                                 </div>
-
                                 <button
-                                    onClick={async () => {
-                                        try {
-                                            const formData = new FormData();
-                                            formData.append(
-                                                'category',
-                                                selected,
-                                            ); // send selected category
-
-                                            const res = await fetch(
-                                                '/pdf/create-blank',
-                                                {
-                                                    method: 'POST',
-                                                    body: formData,
-                                                    headers: {
-                                                        'X-CSRF-TOKEN': document
-                                                            .querySelector(
-                                                                'meta[name="csrf-token"]',
-                                                            )
-                                                            ?.getAttribute(
-                                                                'content',
-                                                            ),
-                                                        Accept: 'application/json',
-                                                    },
-                                                    credentials: 'same-origin', // 🔥 IMPORTANT
-                                                },
-                                            );
-                                            if (!res.ok) {
-                                                const text = await res.text();
-                                                console.error(
-                                                    'Server error:',
-                                                    text,
-                                                );
-                                                alert(
-                                                    'Request failed (check console)',
-                                                );
-                                                return;
-                                            }
-
-                                            const data = await res.json();
-
-                                            if (data.success) {
-                                                // open PDF in a new tab
-                                                window.open(
-                                                    data.path,
-                                                    '_blank',
-                                                );
-                                            } else {
-                                                alert('Failed to create PDF.');
-                                            }
-                                        } catch (err) {
-                                            console.error(err);
-                                            alert('Error creating PDF.');
-                                        }
-                                    }}
-                                    className={`${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black`}
+                                    onClick={handleCreateBlankPdf}
+                                    disabled={isLoading}
+                                    className={`${sectionTitle} cursor-pointer rounded border border-black bg-white px-4 py-2 text-black transition-colors hover:bg-black hover:text-white disabled:opacity-50`}
                                 >
-                                    Create PDF
+                                    {isLoading ? 'Creating...' : 'Create PDF'}
+                                </button>
+                                <button
+                                    onClick={handleDownloadArchive}
+                                    className="mb-4 flex cursor-pointer items-center gap-2 rounded border border-[var(--patients-accent)] bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black tracking-widest text-white transition-all hover:brightness-90 active:scale-95 dark:text-black"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="3"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line
+                                            x1="12"
+                                            y1="15"
+                                            x2="12"
+                                            y2="3"
+                                        ></line>
+                                    </svg>
+                                    Download Archive
                                 </button>
                             </div>
                         )}
                     </div>
+
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
                         {otherFiles.length > 0 ? (
                             otherFiles.map((file) => (
@@ -642,6 +701,82 @@ export default function PatientFolder({
                                     onClick={() => setSelectedRecord(file)}
                                     className="group relative flex cursor-pointer flex-col items-center justify-center rounded-lg border border-[var(--patients-border)] bg-[var(--patients-section-bg)] p-6 text-center transition-all hover:border-[var(--patients-accent)]"
                                 >
+                                    {/* Action Menu Trigger */}
+                                    <button
+                                        onClick={(e) =>
+                                            handleToggleMenu(e, file.id)
+                                        }
+                                        className="absolute top-2 right-2 p-1 text-[var(--patients-muted)] hover:text-[var(--patients-accent)]"
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+
+                                    {/* Dropdown Menu */}
+                                    {openMenuId === file.id && (
+                                        <div className="absolute top-8 right-2 z-20 w-36 animate-in overflow-hidden rounded-md border border-[var(--patients-border)] bg-[var(--patients-section-bg)] shadow-xl duration-150 fade-in zoom-in">
+                                            <div className="py-1">
+                                                {isStaff && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleAddImage(
+                                                                file.id,
+                                                            );
+                                                        }}
+                                                        className="flex w-full items-center px-4 py-2 text-[9px] font-black text-[var(--patients-muted)] uppercase hover:bg-[var(--patients-accent)] hover:text-white"
+                                                    >
+                                                        <ImagePlus
+                                                            size={14}
+                                                            className="mr-2"
+                                                        />{' '}
+                                                        Add Image
+                                                    </button>
+                                                )}
+                                                {isAdmin && (
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleAddImage(
+                                                                    file.id,
+                                                                );
+                                                            }}
+                                                            className="flex w-full items-center px-4 py-2 text-[9px] font-black text-[var(--patients-muted)] uppercase hover:bg-[var(--patients-accent)] hover:text-white"
+                                                        >
+                                                            <ImagePlus
+                                                                size={14}
+                                                                className="mr-2"
+                                                            />{' '}
+                                                            Add Image
+                                                        </button>
+
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteRecord(
+                                                                    file.id,
+                                                                    file.file_name,
+                                                                );
+                                                            }}
+                                                            className="flex w-full items-center px-4 py-2 text-[9px] font-black text-red-500 uppercase hover:bg-red-500 hover:text-white"
+                                                        >
+                                                            <Trash2
+                                                                size={14}
+                                                                className="mr-2"
+                                                            />{' '}
+                                                            Delete
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {!isAdmin && !isStaff && (
+                                                    <div className="px-4 py-2 text-[8px] font-black uppercase italic">
+                                                        No Actions
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <img
                                         src="/images/pdf.png"
                                         alt="PDF"
@@ -666,7 +801,6 @@ export default function PatientFolder({
                         )}
                     </div>
 
-                    {/* --- PAGINATION CONTROLS --- */}
                     {records.links.length > 3 && (
                         <div className="mt-12 flex flex-wrap items-center justify-center gap-1">
                             {records.links.map((link, index) => (
@@ -676,13 +810,7 @@ export default function PatientFolder({
                                     dangerouslySetInnerHTML={{
                                         __html: link.label,
                                     }}
-                                    className={`flex h-10 min-w-[40px] items-center justify-center rounded px-3 text-[10px] font-black uppercase transition-all ${
-                                        link.active
-                                            ? 'bg-[var(--patients-accent)] text-white shadow-md dark:text-black'
-                                            : link.url
-                                              ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-muted)] hover:border-[var(--patients-accent)] hover:text-[var(--patients-text)]'
-                                              : 'cursor-not-allowed opacity-20'
-                                    }`}
+                                    className={`flex h-10 min-w-[40px] items-center justify-center rounded px-3 text-[10px] font-black uppercase transition-all ${link.active ? 'bg-[var(--patients-accent)] text-white shadow-md' : link.url ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-muted)] hover:border-[var(--patients-accent)] hover:text-[var(--patients-text)]' : 'cursor-not-allowed opacity-20'}`}
                                     preserveScroll
                                 />
                             ))}
@@ -690,7 +818,6 @@ export default function PatientFolder({
                     )}
                 </section>
             </main>
-
             {/* --- MODAL PDF VIEWER --- */}
             {selectedRecord && (
                 <div className="fixed inset-0 z-[100] flex flex-col bg-black/90 backdrop-blur-sm">
@@ -705,7 +832,7 @@ export default function PatientFolder({
                         </div>
                         <button
                             onClick={() => setSelectedRecord(null)}
-                            className="cursor-pointer bg-red-600 px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase transition-colors hover:bg-red-700"
+                            className="cursor-pointer bg-red-600 px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase hover:bg-red-700"
                         >
                             Close
                         </button>
@@ -725,18 +852,14 @@ export default function PatientFolder({
                     </div>
                 </div>
             )}
-
-            {/* MODAL VIEW HRN */}
-            {/* --- HRN MODAL --- */}
+            {/* --- OTHER HRN MODAL --- */}
             {isHRNModalOpen && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-lg bg-[var(--patients-section-bg)] p-6 shadow-xl">
-                        {/* HEADER */}
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-sm font-black tracking-widest text-[var(--patients-accent)] uppercase">
                                 Other HRNs
                             </h2>
-
                             <button
                                 onClick={() => setIsHRNModalOpen(false)}
                                 className="cursor-pointer text-xs font-bold text-red-500 hover:underline"
@@ -744,75 +867,46 @@ export default function PatientFolder({
                                 Close
                             </button>
                         </div>
-
-                        {/* CURRENT HRN */}
-                        <div className="mb-4">
-                            <p className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                Primary
-                            </p>
-                            <p className="font-mono text-sm font-black text-[var(--patients-accent)]">
-                                {patient.hrn}
-                            </p>
-                        </div>
-
-                        {/* LIST */}
                         <div className="space-y-2">
-                            {/* Use patient.hrns to show everything, or otherHRNs to show only secondary ones */}
                             {patient.hrns && patient.hrns.length > 0 ? (
-                                [...patient.hrns]
-                                    .sort(
-                                        (a, b) =>
-                                            (b.hrn === patient.hrn ? 1 : 0) -
-                                            (a.hrn === patient.hrn ? 1 : 0),
-                                    )
-                                    .map((h) => {
-                                        const isMain = h.hrn === patient.hrn;
-                                        return (
-                                            <div
-                                                key={h.id}
-                                                className={`flex items-center justify-between rounded border px-3 py-2 font-mono text-xs transition-all ${
-                                                    isMain
-                                                        ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10 ring-1 ring-[var(--patients-accent)]/20'
-                                                        : 'border-[var(--patients-border)] bg-black/5 dark:bg-black/20'
-                                                }`}
-                                            >
-                                                <span
-                                                    className={
-                                                        isMain
-                                                            ? 'font-black text-[var(--patients-accent)]'
-                                                            : ''
-                                                    }
-                                                >
-                                                    {h.hrn}
-                                                </span>
-                                                {isMain && (
-                                                    <span className="text-[8px] font-black text-[var(--patients-accent)] uppercase">
-                                                        Main
-                                                    </span>
-                                                )}
-                                            </div>
-                                        );
-                                    })
+                                [...patient.hrns].map((h) => (
+                                    <div
+                                        key={h.id}
+                                        className={`flex items-center justify-between rounded border px-3 py-2 font-mono text-xs ${h.hrn === patient.hrn ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10' : 'border-[var(--patients-border)]'}`}
+                                    >
+                                        <span
+                                            className={
+                                                h.hrn === patient.hrn
+                                                    ? 'font-black text-[var(--patients-accent)]'
+                                                    : ''
+                                            }
+                                        >
+                                            {h.hrn}
+                                        </span>
+                                        {h.hrn === patient.hrn && (
+                                            <span className="text-[8px] font-black text-[var(--patients-accent)] uppercase">
+                                                Main
+                                            </span>
+                                        )}
+                                    </div>
+                                ))
                             ) : (
-                                <p className="text-[10px] text-[var(--patients-muted)] uppercase italic">
-                                    No additional HRNs found
+                                <p className="text-[10px] uppercase italic">
+                                    No additional HRNs
                                 </p>
                             )}
                         </div>
                     </div>
                 </div>
             )}
-
-            {/* MODAL ADD HRN */}
+            {/* --- ADD HRN MODAL --- */}
             {isAddHRNModalOpen && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-lg bg-[var(--patients-section-bg)] p-6 shadow-xl">
-                        {/* HEADER */}
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-sm font-black tracking-widest text-[var(--patients-accent)] uppercase">
                                 Add New HRN
                             </h2>
-
                             <button
                                 onClick={() => setIsAddHRNModalOpen(false)}
                                 className="cursor-pointer text-xs font-bold text-red-500 hover:underline"
@@ -820,67 +914,50 @@ export default function PatientFolder({
                                 Close
                             </button>
                         </div>
-
-                        {/* FORM */}
                         <form onSubmit={submitHRN} className="space-y-4">
-                            {/* INPUT */}
                             <div>
-                                <label className="text-[10px] font-bold text-[var(--patients-muted)] uppercase">
-                                    New HRN
-                                </label>
+                                <label className={labelClass}>New HRN</label>
                                 <input
                                     type="text"
-                                    inputMode="numeric" // Shows numeric keypad on mobile
+                                    inputMode="numeric"
                                     value={data.hrns}
                                     onChange={(e) => {
-                                        // 1. Remove any non-digit characters
                                         const val = e.target.value.replace(
                                             /\D/g,
                                             '',
                                         );
-
-                                        // 2. Limit to exactly 15 digits
-                                        if (val.length <= 15) {
+                                        if (val.length <= 15)
                                             setData('hrns', val);
-                                        }
                                     }}
-                                    className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm transition-colors focus:border-[var(--patients-accent)] focus:outline-none"
+                                    className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm focus:border-[var(--patients-accent)] focus:outline-none"
                                     placeholder="Enter 15-digit HRN..."
                                     required
                                 />
-
-                                {/* Visual counter (Optional but helpful) */}
                                 <div className="mt-1 flex justify-between">
-                                    {errors.hrns ? (
+                                    {errors.hrns && (
                                         <p className="text-[10px] font-bold text-red-500 uppercase">
                                             {errors.hrns}
                                         </p>
-                                    ) : (
-                                        <div />
                                     )}
-
                                     <span
-                                        className={`text-[9px] font-medium uppercase ${data.hrns.length === 15 ? 'text-green-500' : 'text-gray-400'}`}
+                                        className={`text-[9px] uppercase ${data.hrns.length === 15 ? 'text-green-500' : 'text-gray-400'}`}
                                     >
                                         {data.hrns.length} / 15
                                     </span>
                                 </div>
                             </div>
-
-                            {/* ACTIONS */}
                             <div className="flex justify-end gap-2 pt-2">
                                 <button
                                     type="button"
                                     onClick={() => setIsAddHRNModalOpen(false)}
-                                    className="cursor-pointer px-4 py-2 text-[10px] font-black text-gray-500 uppercase hover:underline"
+                                    className="cursor-pointer px-4 py-2 text-[10px] font-black text-gray-500 uppercase"
                                 >
                                     Cancel
                                 </button>
-
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="cursor-pointer bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black text-white uppercase transition hover:brightness-90 disabled:opacity-50"
+                                    className="cursor-pointer bg-[var(--patients-accent)] px-4 py-2 text-[10px] font-black text-white uppercase hover:brightness-90 disabled:opacity-50"
                                 >
                                     {processing ? 'Saving...' : 'Save HRN'}
                                 </button>

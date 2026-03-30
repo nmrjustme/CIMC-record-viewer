@@ -1,7 +1,7 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
-* @see \App\Http\Controllers\PdfController::createBlank
- * @see app/Http/Controllers/PdfController.php:16
+* @see \App\Http\Controllers\PatientPdfController::createBlank
+ * @see app/Http/Controllers/PatientPdfController.php:18
  * @route '/pdf/create-blank'
  */
 export const createBlank = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -15,8 +15,8 @@ createBlank.definition = {
 } satisfies RouteDefinition<["post"]>
 
 /**
-* @see \App\Http\Controllers\PdfController::createBlank
- * @see app/Http/Controllers/PdfController.php:16
+* @see \App\Http\Controllers\PatientPdfController::createBlank
+ * @see app/Http/Controllers/PatientPdfController.php:18
  * @route '/pdf/create-blank'
  */
 createBlank.url = (options?: RouteQueryOptions) => {
@@ -24,8 +24,8 @@ createBlank.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see \App\Http\Controllers\PdfController::createBlank
- * @see app/Http/Controllers/PdfController.php:16
+* @see \App\Http\Controllers\PatientPdfController::createBlank
+ * @see app/Http/Controllers/PatientPdfController.php:18
  * @route '/pdf/create-blank'
  */
 createBlank.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -34,8 +34,8 @@ createBlank.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 })
 
     /**
-* @see \App\Http\Controllers\PdfController::createBlank
- * @see app/Http/Controllers/PdfController.php:16
+* @see \App\Http\Controllers\PatientPdfController::createBlank
+ * @see app/Http/Controllers/PatientPdfController.php:18
  * @route '/pdf/create-blank'
  */
     const createBlankForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -44,8 +44,8 @@ createBlank.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     })
 
             /**
-* @see \App\Http\Controllers\PdfController::createBlank
- * @see app/Http/Controllers/PdfController.php:16
+* @see \App\Http\Controllers\PatientPdfController::createBlank
+ * @see app/Http/Controllers/PatientPdfController.php:18
  * @route '/pdf/create-blank'
  */
         createBlankForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -54,8 +54,83 @@ createBlank.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
         })
     
     createBlank.form = createBlankForm
+/**
+* @see \App\Http\Controllers\PatientPdfController::uploadImage
+ * @see app/Http/Controllers/PatientPdfController.php:95
+ * @route '/pdf/upload-image/{fileId}'
+ */
+export const uploadImage = (args: { fileId: string | number } | [fileId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: uploadImage.url(args, options),
+    method: 'post',
+})
+
+uploadImage.definition = {
+    methods: ["post"],
+    url: '/pdf/upload-image/{fileId}',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\PatientPdfController::uploadImage
+ * @see app/Http/Controllers/PatientPdfController.php:95
+ * @route '/pdf/upload-image/{fileId}'
+ */
+uploadImage.url = (args: { fileId: string | number } | [fileId: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { fileId: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    fileId: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        fileId: args.fileId,
+                }
+
+    return uploadImage.definition.url
+            .replace('{fileId}', parsedArgs.fileId.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\PatientPdfController::uploadImage
+ * @see app/Http/Controllers/PatientPdfController.php:95
+ * @route '/pdf/upload-image/{fileId}'
+ */
+uploadImage.post = (args: { fileId: string | number } | [fileId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: uploadImage.url(args, options),
+    method: 'post',
+})
+
+    /**
+* @see \App\Http\Controllers\PatientPdfController::uploadImage
+ * @see app/Http/Controllers/PatientPdfController.php:95
+ * @route '/pdf/upload-image/{fileId}'
+ */
+    const uploadImageForm = (args: { fileId: string | number } | [fileId: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: uploadImage.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\PatientPdfController::uploadImage
+ * @see app/Http/Controllers/PatientPdfController.php:95
+ * @route '/pdf/upload-image/{fileId}'
+ */
+        uploadImageForm.post = (args: { fileId: string | number } | [fileId: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: uploadImage.url(args, options),
+            method: 'post',
+        })
+    
+    uploadImage.form = uploadImageForm
 const pdf = {
     createBlank: Object.assign(createBlank, createBlank),
+uploadImage: Object.assign(uploadImage, uploadImage),
 }
 
 export default pdf

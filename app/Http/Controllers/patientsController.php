@@ -57,26 +57,28 @@ class PatientsController extends Controller
             return redirect()->route('patients.index')
                 ->with('error', 'Patient record not found or session expired.');
         }
-
-        // Eager load everything needed for the view to avoid N+1
+        
         $patient = patients::with(['information.address', 'hrns'])
             ->where('hrn', $hrn)
             ->firstOrFail();
 
         $this->logActivity('VIEW', "Accessed folder for: {$patient->firstname} {$patient->lastname}", 'Patient Records');
-        
+
+        // We eager load 'file' and its nested 'pages' (dbo.record_pages)
         $records = $patient->records()
-            ->with('file') // Eager load files for the Resource
+            ->with(['file.pages'])
             ->latest()
             ->paginate(10);
 
+            // dd($records->toArray());
+
         return Inertia::render('PatientFolder', [
             'patient'  => $patient,
-            'records'  => PatientRecordResource::collection($records), // Clean transformation
+            // Ensure the Resource can handle the nested 'pages'
+            'records'  => PatientRecordResource::collection($records),
             'fromPage' => session('folder_source', 'search')
         ]);
     }
-
     public function create(Request $request)
     {
         $patients = patients::query()
@@ -124,7 +126,7 @@ class PatientsController extends Controller
                 'municipality' => $validated['municipality'],
                 'province'     => $validated['province'],
             ]);
-            
+
             return $patient;
         });
 

@@ -10,6 +10,7 @@ use App\Http\Controllers\ActivityLogsController;
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PatientHRNController;
+use App\Http\Controllers\PatientPdfController;
 use App\Http\Controllers\PdfController;
 
 // Route::inertia('/', 'welcome', [
@@ -43,14 +44,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::post('/pdf/create-blank', [PdfController::class, 'createBlankPdf'])
                 ->name('pdf.create-blank');
+        Route::post('/pdf/create-blank', [PatientPdfController::class, 'createBlank'])->name('pdf.create-blank');
+        Route::post('/pdf/upload-image/{fileId}', [PatientPdfController::class, 'uploadImage'])->name('pdf.upload-image');
     });
 
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-
-
         Route::get('/register', [RegisterController::class, 'index'])->name('register');
         Route::post('/register', [RegisterController::class, 'store']);
         Route::put('/users/{user}', [RegisterController::class, 'update']);

@@ -7,16 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class RecordsPageModel extends Model
 {
     protected $table = 'record_pages';
-    
+
     protected $fillable = [
         'file_id',
         'total_pages',
         'image_path',
         'uploaded_by'
     ];
-
-    public function files()
+    
+    public function file()
     {
-        return $this->belongsTo(PatientsRecordsFileModel::class, 'file_id', 'id');
+        // This is the missing piece!
+        return $this->belongsTo(PatientsRecordsFileModel::class, 'file_id');
+    }
+    
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
     }
 }
