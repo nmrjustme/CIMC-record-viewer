@@ -17,7 +17,7 @@ class PatientsInfoSeeder extends Seeder
 
         // Get all patient IDs (foreign key)
         $patients = DB::table('patients')->pluck('id')->toArray();
-        
+
 
         if (empty($patients)) {
             $this->command->info('No patients found! Please seed patients first.');
@@ -30,6 +30,7 @@ class PatientsInfoSeeder extends Seeder
                 'patient_id' => $patientId,
                 'civil_status' => $faker->randomElement(['Single', 'Married', 'Widowed', 'Separated']),
                 'nationality' => 'Filipino',
+                'sex' => $faker->randomElement(['Male', 'Female']),
                 'birthdate' => $faker->date('Y-m-d', '2005-01-01'),
                 'place_of_birth' => $faker->city,
                 'religion' => $faker->randomElement(['Roman Catholic', 'Christian', 'Iglesia ni Cristo', 'Muslim']),
