@@ -27,6 +27,21 @@ class PatientPdfController extends Controller
         try {
             $patient = patients::findOrFail($request->records_id);
 
+
+            // --- NEW: Check for duplicate PDF ---
+            $existingFile = PatientsRecordsFileModel::whereHas('records', function ($q) use ($patient, $request) {
+                $q->where('patients_id', $patient->id)
+                ->where('record_type', $request->category);
+            })->first();
+
+            if ($existingFile) {
+                return redirect()->back()->with('flash', [
+                    'success' => false,
+                    'message' => "A PDF for {$request->category} already exists for this patient!",
+                    'pdf_path' => asset($existingFile->file_path)
+                ]);
+            }
+
             $record = patientsRecord::create([
                 'patients_id' => $patient->id,
                 'record_type' => $request->category,
@@ -62,7 +77,8 @@ class PatientPdfController extends Controller
                 'records'     => []
             ])->setPaper('a4');
 
-            $fileName = "{$request->category}_" . time() . ".pdf";
+            // $fileName = "{$request->category}_" . time() . ".pdf";
+            $fileName = "{$request->category}_HRN-{$patient->hrn}.pdf";
             $storagePath = "pdfs/{$fileName}";
             Storage::disk('public')->put($storagePath, $pdf->output());
 
@@ -98,7 +114,7 @@ class PatientPdfController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10240 KB = 10MB
         ]);
         DB::beginTransaction();
-        
+
         try {
             $fileRecord = PatientsRecordsFileModel::with('records.patient')->findOrFail($fileId);
             $patient = $fileRecord->records->patient;

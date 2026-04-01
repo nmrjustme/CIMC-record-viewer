@@ -87,6 +87,7 @@ export default function PatientFolder({
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState('OPD RECORD');
     const [search, setSearch] = useState('');
+
     const [categories, setCategories] = useState([
         'OPD RECORD',
         'LABORATORY',
@@ -193,6 +194,7 @@ export default function PatientFolder({
 
     const handleCreateBlankPdf = () => {
         setIsLoading(true);
+
         router.post(
             `/pdf/create-blank`,
             {
@@ -201,19 +203,36 @@ export default function PatientFolder({
             },
             {
                 onSuccess: (page) => {
-                    const flash = page.props.flash as { pdf_path?: string };
+                    const flash = page.props.flash as {
+                        success?: boolean;
+                        pdf_path?: string;
+                        message?: string;
+                    };
+
                     if (flash?.pdf_path) {
+                        // Open PDF if it already exists
                         window.open(flash.pdf_path, '_blank');
                     }
-                    setNotificationType('success');
-                    setNotificationMessage('PDF successfully created!');
+
+                    if (flash?.success === false) {
+                        // Duplicate PDF
+                        setNotificationMessage(
+                            flash.message || 'PDF already exists.',
+                        );
+                        setNotificationType('error');
+                    } else {
+                        // New PDF created successfully
+                        setNotificationMessage(
+                            flash?.message || 'PDF successfully created!',
+                        );
+                        setNotificationType('success');
+                    }
+
                     setShowNotification(true);
                 },
-                onError: (errors: any) => {
+                onError: () => {
+                    setNotificationMessage('Failed to create PDF.');
                     setNotificationType('error');
-                    setNotificationMessage(
-                        errors.create_pdf || 'Failed to create PDF.',
-                    );
                     setShowNotification(true);
                 },
                 onFinish: () => {
@@ -281,12 +300,12 @@ export default function PatientFolder({
             <Head title={`${patient.lastname}'s Records`} />
             {!isAdmin && <Header />}
             {/* Hidden File Input for Image Upload */}
-            <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
-                accept="image/*" 
-                onChange={handleFileChange} 
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
             />
             {showNotification && (
                 <div
