@@ -6,35 +6,33 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PatientRecordResource extends JsonResource
 {
-      public function toArray($request)
-      {
-            // Get the first file record from the relationship
-            $firstFile = $this->file->first();
+    public function toArray($request)
+    {
+        // Get the file with the absolute latest update time (including milliseconds)
+        $latestFile = $this->file->sortByDesc('updated_at')->first();
+        
+        return [
+            'id'            => $this->id,
+            'file_name'     => $this->record_type ?? 'Unnamed File',
+            
+            // CRITICAL: We take the updated_at from the file, not just the record
+            // This ensures 2026-04-02 16:49:32.763 is sent correctly
+            'updated_at'    => $latestFile ? $latestFile->updated_at->toISOString() : $this->updated_at->toISOString(), 
+            
+            'created_at'    => $this->created_at->toISOString(),
+            'pdf_url'       => $latestFile ? asset($latestFile->file_path) : null,
+            'total'         => $this->file->count(),
 
-            return [
-                  'id'           => $this->id,
-                  'file_name'    => $this->record_type ?? 'Unnamed File',
-                  'updated_at'   => $this->updated_at,
-                  'created_at'   => $this->created_at,
-                  'pdf_url'      => $firstFile ? asset($firstFile->file_path) : null,
-                  'file_count'   => $this->file->count(),
-
-                  /* |--------------------------------------------------------------------------
-            | Record Pages (Images)
-            |--------------------------------------------------------------------------
-            | We map the 'pages' relationship from the first file. 
-            | We use asset() to ensure the React frontend gets a full URL.
-            */
-                  'pages' => ($firstFile && $firstFile->pages)
-                        ? $firstFile->pages->map(function ($page) {
-                              return [
-                                    'id'          => $page->id,
-                                    'file_id'     => $page->file_id,
-                                    'image_path'  => asset($page->image_path),
-                                    'total_pages' => $page->total_pages,
-                              ];
-                        })
-                        : [],
-            ];
-      }
+            'pages' => ($latestFile && $latestFile->pages)
+                ? $latestFile->pages->map(function ($page) {
+                    return [
+                        'id'          => $page->id,
+                        'file_id'     => $page->file_id,
+                        'image_path'  => asset($page->image_path),
+                        'total_pages' => $page->total_pages,
+                    ];
+                })
+                : [],
+        ];
+    }
 }

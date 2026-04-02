@@ -111,6 +111,12 @@
     --patients-muted: #6b7280;
     
     --input-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+    --button-border: #6B6B6B;
+    --button-border-hover: #0000ff;
+    --button-bg: #0000ff;
+    --button-text: #ffffff;
+    --button-hover-bg: 	#1F45FC;
 }
 
 .dark {
@@ -149,11 +155,17 @@
 
     --patients-sidebar-bg: #000000;
     --patients-border: #353535;
-    --patients-section-border: transparent; /* Use transparent border for sections in dark mode */
+    --patients-section-border: transparent;
     --patients-section-bg: #171717;
     --patients-accent: #3b82f6;
     --patients-text: #e5e5e5;
     --patients-muted: #a8a8a8;
+
+    --button-border: #4A4A4A;       /* Slightly darker/muted gray */
+    --button-border-hover: #3B82F6; /* Brighter, more legible blue */
+    --button-bg: #2563EB;          /* Slightly deeper blue for dark UI */
+    --button-text: #FFFFFF;        /* Keep white for high contrast */
+    --button-hover-bg: #3B82F6;
 }
 
 @layer base {

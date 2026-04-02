@@ -40,7 +40,7 @@ export default function PatientTable({
                             <th className="hidden px-8 py-4 text-center md:table-cell">
                                 Files
                             </th>
-                            <th className="px-8 py-4 text-right">Action</th>
+                            {/* <th className="px-8 py-4 text-right">Action</th> */}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--patients-border)]">
@@ -175,7 +175,7 @@ export default function PatientTable({
                                                 {p.records_count ?? 0} PDF(s)
                                             </span>
                                         </td>
-                                        <td className="px-8 py-5 text-right">
+                                        {/* <td className="px-8 py-5 text-right">
                                             <button
                                                 onClick={() =>
                                                     router.post(
@@ -196,7 +196,7 @@ export default function PatientTable({
                                                     ? 'View'
                                                     : 'View Folder'}
                                             </button>
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 );
                             })

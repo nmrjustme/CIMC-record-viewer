@@ -23,62 +23,46 @@ class PatientPdfController extends Controller
         ]);
 
         DB::beginTransaction();
-
+        
         try {
             $patient = patients::findOrFail($request->records_id);
 
+            // Check for duplicates (Keep this logic)
+            $existingRecord = patientsRecord::where('patients_id', $patient->id)
+                ->where('record_type', $request->category)
+                ->first();
 
-            // --- NEW: Check for duplicate PDF ---
-            $existingFile = PatientsRecordsFileModel::whereHas('records', function ($q) use ($patient, $request) {
-                $q->where('patients_id', $patient->id)
-                ->where('record_type', $request->category);
-            })->first();
-
-            if ($existingFile) {
+            if ($existingRecord) {
+                $existingFile = PatientsRecordsFileModel::where('records_id', $existingRecord->id)->first();
+                DB::rollBack();
                 return redirect()->back()->with('flash', [
                     'success' => false,
-                    'message' => "A PDF for {$request->category} already exists for this patient!",
-                    'pdf_path' => asset($existingFile->file_path)
+                    'message' => "A record for {$request->category} already exists.",
+                    'pdf_path' => $existingFile ? asset($existingFile->file_path) : null
                 ]);
             }
 
             $record = patientsRecord::create([
                 'patients_id' => $patient->id,
                 'record_type' => $request->category,
-                'description' => "System generated PDF with imported image",
+                'description' => "System generated PDF",
                 'created_by'  => Auth::id(),
             ]);
 
-            // Logic to find existing image
-            $existingImage = RecordsPageModel::whereHas('file.records', function ($q) use ($patient) {
-                $q->where('patients_id', $patient->id);
-            })->where('image_path', '!=', 'N/A')->latest()->first();
-
+            // --- FIXED: Do not look for existing images here ---
             $imageSrc = null;
             $importedImagePath = 'N/A';
 
-            if ($existingImage) {
-                $importedImagePath = $existingImage->image_path;
-                // createBlank logic: strip 'storage/' to check disk
-                $cleanPath = str_replace('storage/', '', $importedImagePath);
-
-                if (Storage::disk('public')->exists($cleanPath)) {
-                    $fullPath = storage_path('app/public/' . $cleanPath);
-                    $imageData = base64_encode(file_get_contents($fullPath));
-                    $imageSrc = 'data:image/jpeg;base64,' . $imageData;
-                }
-            }
-
+            // Generate PDF
             $pdf = Pdf::loadView('pdf.patient-archive', [
                 'category'    => $request->category,
                 'date'        => now()->format('m/d/Y'),
                 'patient'     => $patient,
-                'importImage' => $imageSrc,
+                'importImage' => $imageSrc, // Will be null
                 'records'     => []
             ])->setPaper('a4');
 
-            // $fileName = "{$request->category}_" . time() . ".pdf";
-            $fileName = "{$request->category}_HRN-{$patient->hrn}.pdf";
+            $fileName = "{$request->category}_HRN-{$patient->hrn}_" . time() . ".pdf";
             $storagePath = "pdfs/{$fileName}";
             Storage::disk('public')->put($storagePath, $pdf->output());
 
@@ -91,7 +75,7 @@ class PatientPdfController extends Controller
             RecordsPageModel::create([
                 'file_id'     => $fileRecord->id,
                 'total_pages' => 1,
-                'image_path'  => $importedImagePath,
+                'image_path'  => $importedImagePath, // Will be 'N/A'
                 'uploaded_by' => Auth::id(),
             ]);
 
@@ -99,77 +83,88 @@ class PatientPdfController extends Controller
 
             return redirect()->back()->with('flash', [
                 'success'  => true,
+                'message'  => "{$request->category} created successfully.",
                 'pdf_path' => asset($fileRecord->file_path)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("createBlank Failed: " . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+            return redirect()->back()->with('flash', [
+                'success' => false,
+                'message' => "Critical Error: " . $e->getMessage()
+            ]);
         }
     }
-
+    
     public function uploadImage(Request $request, $fileId)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:10240', // 10240 KB = 10MB
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:10240',
         ]);
+
         DB::beginTransaction();
 
         try {
             $fileRecord = PatientsRecordsFileModel::with('records.patient')->findOrFail($fileId);
             $patient = $fileRecord->records->patient;
 
-            // 1. Handle Image Storage (Following createBlank style)
+            // 1. Handle Image Storage
             $imageFile = $request->file('image');
             $extension = $imageFile->getClientOriginalExtension();
             $imageName = 'img_' . time() . '_' . uniqid() . '.' . $extension;
-
-            // This returns 'pdf_image/filename.jpg'
             $pathOnDisk = $imageFile->storeAs('pdf_image', $imageName, 'public');
-
-            // Following createBlank: path is stored as "storage/pdf_image/filename.jpg"
             $databaseImagePath = "storage/" . $pathOnDisk;
 
-            // 2. Prepare Base64 for DomPDF rendering
-            $fullPhysicalPath = storage_path('app/public/' . $pathOnDisk);
-            $imageData = base64_encode(file_get_contents($fullPhysicalPath));
-            $base64Image = 'data:image/' . $extension . ';base64,' . $imageData;
+            // 2. Create a NEW Page Record (Don't updateOrCreate, just create to append)
+            RecordsPageModel::create([
+                'file_id'    => $fileId,
+                'image_path' => $databaseImagePath,
+                'total_pages' => 1,
+                'uploaded_by' => Auth::id()
+            ]);
 
-            // 3. Update the Page Record
-            // IMPORTANT: If this still saves 'N/A', you MUST check if 'image_path' is in $fillable in the Model
-            RecordsPageModel::updateOrCreate(
-                ['file_id' => $fileId],
-                [
-                    'image_path'  => $databaseImagePath,
-                    'total_pages' => 1,
-                    'uploaded_by' => Auth::id()
-                ]
-            );
+            // 3. Fetch ALL images for this file to render them in order
+            $allPages = RecordsPageModel::where('file_id', $fileId)
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-            // 4. Regenerate PDF with the NEW image
+            $base64Images = [];
+            foreach ($allPages as $page) {
+                // Strip 'storage/' to find the file in the actual storage/app/public folder
+                $diskPath = str_replace('storage/', '', $page->image_path);
+                $fullPath = storage_path('app/public/' . $diskPath);
+
+
+                if (file_exists($fullPath)) {
+                    $imageData = base64_encode(file_get_contents($fullPath));
+                    $mime = mime_content_type($fullPath);
+                    $base64Images[] = 'data:' . $mime . ';base64,' . $imageData;
+                }
+            }
+
+            // 4. Regenerate PDF with the ARRAY of images
             $pdf = Pdf::loadView('pdf.patient-archive', [
-                'category'    => $fileRecord->records->record_type,
-                'date'        => now()->format('m/d/Y'),
-                'patient'     => $patient,
-                'importImage' => $base64Image,
-                'records'     => []
+                'category'     => $fileRecord->records->record_type,
+                'date'         => now()->format('m/d/Y'),
+                'patient'      => $patient,
+                'importImages' => $base64Images,
+                'records'      => []
             ])->setPaper('a4');
 
-            // Strip 'storage/' to get the disk-relative path for writing
+            // 5. Update the actual PDF file on disk
             $relativePdfPath = str_replace('storage/', '', $fileRecord->file_path);
             Storage::disk('public')->put($relativePdfPath, $pdf->output());
 
-            $fileRecord->touch();
+            $fileRecord->touch(); // Update the timestamp to reflect the new PDF version
 
             DB::commit();
-
-            return redirect()->back()->with('success', 'Image uploaded and PDF updated successfully.');
+            return redirect()->back()->with('success', 'Image appended and PDF updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             if (isset($pathOnDisk)) {
                 Storage::disk('public')->delete($pathOnDisk);
             }
-            Log::error("uploadImage Failed: " . $e->getMessage());
+            Log::error("uploadImage Append Failed: " . $e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
