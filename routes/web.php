@@ -25,9 +25,6 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
-
-
     Route::prefix('/viewer')->name('patients.')->group(function () {
         Route::get('/record-finder', [patientsController::class, 'index'])->name('index');
 
@@ -46,8 +43,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('pdf.create-blank');
         Route::post('/pdf/create-blank', [PatientPdfController::class, 'createBlank'])->name('pdf.create-blank');
         Route::post('/pdf/upload-image/{fileId}', [PatientPdfController::class, 'uploadImage'])->name('pdf.upload-image');
+        Route::delete('/pdf/delete-file/{id}', [PatientPdfController::class, 'deleteFile'])->name('pdf.delete-file');
+        Route::delete('/pdf/delete-image/{pageId}', [PatientPdfController::class, 'deleteImage']);
     });
-
+    
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

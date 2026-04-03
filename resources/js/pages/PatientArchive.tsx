@@ -180,16 +180,17 @@ export default function PatientArchive({
                                         RECENTLY UPDATED
                                     </div>
                                 )}
-                                
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleToggleMenu(e, file.id);
-                                    }}
-                                    className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-[var(--patients-muted)] hover:text-[var(--patients-accent)]"
-                                >
-                                    <MoreVertical size={16} />
-                                </button>
+                                {(isAdmin || isStaff) && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleToggleMenu(e, file.id);
+                                        }}
+                                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-[var(--patients-muted)] hover:text-[var(--patients-accent)] cursor-pointer"
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+                                )}
 
                                 {openMenuId === file.id && (
                                     <div className="absolute top-10 right-2 z-20 w-40 animate-in overflow-hidden rounded-md border border-[var(--patients-border)] bg-[var(--patients-section-bg)] shadow-2xl duration-150 fade-in zoom-in slide-in-from-top-2">
@@ -197,10 +198,11 @@ export default function PatientArchive({
                                             {isAdmin && (
                                                 <button
                                                     onClick={(e) => {
+                                                        e.preventDefault();
                                                         e.stopPropagation();
                                                         handleDeleteRecord(file.id, file.file_name);
                                                     }}
-                                                    className="flex w-full items-center px-4 py-2.5 text-[9px] font-black text-red-500 uppercase hover:bg-red-500 hover:text-white transition-colors"
+                                                    className="flex w-full items-center px-4 py-2.5 text-[9px] font-black text-red-500 uppercase hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
                                                 >
                                                     <Trash2 size={14} className="mr-2" />
                                                     Delete Permanent

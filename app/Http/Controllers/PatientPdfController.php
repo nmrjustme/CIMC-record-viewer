@@ -13,10 +13,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Laravel\Facades\Image;
-
+use App\Traits\Loggable;
 
 class PatientPdfController extends Controller
 {
+    use Loggable;
+
     public function createBlank(Request $request)
     {
         $request->validate([
@@ -83,6 +85,8 @@ class PatientPdfController extends Controller
 
             DB::commit();
 
+            $this->logActivity('CREATE', "Generated blank PDF ({$request->category}) for Patient HRN: {$patient->hrn}", 'Medical Records');
+
             return redirect()->back()->with('flash', [
                 'success' => true,
                 'message' => "{$request->category} created successfully.",
@@ -112,6 +116,8 @@ class PatientPdfController extends Controller
             $fileRecord = PatientsRecordsFileModel::with('records.patient')->findOrFail($fileId);
             $patient = $fileRecord->records->patient;
             $directory = 'pdf_image';
+            
+            $count = count($request->file('images'));
 
             // Ensure directory exists
             if (!Storage::disk('public')->exists($directory)) {
@@ -180,12 +186,132 @@ class PatientPdfController extends Controller
             $fileRecord->touch();
 
             DB::commit();
-            return redirect()->back()->with('success', count($request->file('images')) . ' images processed and PDF updated.');
 
+            $this->logActivity('UPDATE', "Uploaded $count images to record ID: {$fileId} (Patient: {$patient->lastname})", 'Medical Records');
+            
+            return redirect()->back()->with('success', count($request->file('images')) . ' images processed and PDF updated.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("uploadImage Failed: " . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Failed to process images: ' . $e->getMessage()]);
+        }
+    }
+    
+    public function deleteFile($id)
+    {
+        // 1. Find the file record with its parent relation
+        $file = PatientsRecordsFileModel::with('records')->findOrFail($id);
+        $recordType = $file->records->record_type;
+        $patientHrn = $file->records->patient->hrn ?? 'Unknown';
+        $recordType = $file->records->record_type;
+        // Get the parent record ID before we start deleting
+        $parentRecordId = $file->records_id;
+
+        DB::beginTransaction();
+
+        try {
+            // 2. DISK CLEANUP: Delete the actual PDF file
+            // Your other methods use 'file_path' and prefix it with 'storage/'
+            if ($file->file_path) {
+                $relativePdfPath = str_replace('storage/', '', $file->file_path);
+                if (Storage::disk('public')->exists($relativePdfPath)) {
+                    Storage::disk('public')->delete($relativePdfPath);
+                }
+            }
+
+            // 3. IMAGE CLEANUP: Delete associated optimized images from disk
+            $pages = RecordsPageModel::where('file_id', $id)->get();
+            foreach ($pages as $page) {
+                if ($page->image_path && $page->image_path !== 'N/A') {
+                    $relativeImgPath = str_replace('storage/', '', $page->image_path);
+                    Storage::disk('public')->delete($relativeImgPath);
+                }
+            }
+
+            // 4. DATABASE CLEANUP: Delete the records
+            // This will delete the file entry and the page entries
+            $file->delete();
+
+            // Also delete the parent 'patientsRecord' entry so it's fully gone
+            if ($parentRecordId) {
+                patientsRecord::where('id', $parentRecordId)->delete();
+            }
+
+            DB::commit();
+
+            $this->logActivity('DELETE', "Deleted entire $recordType record for Patient HRN: $patientHrn", 'Medical Records');
+
+            return redirect()->back()->with('flash', [
+                'success' => true,
+                'message' => 'Record and associated files deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Delete File Failed: " . $e->getMessage());
+            return redirect()->back()->with('flash', [
+                'success' => false,
+                'message' => 'Failed to delete file: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    public function deleteImage($pageId)
+    {
+        DB::beginTransaction();
+        try {
+            // 1. Locate the specific page
+            $page = RecordsPageModel::findOrFail($pageId);
+            $fileId = $page->file_id;
+            $fileRecord = PatientsRecordsFileModel::with('records.patient')->findOrFail($fileId);
+
+            // 2. Physical File Deletion
+            if ($page->image_path && $page->image_path !== 'N/A') {
+                $relativeImgPath = str_replace('storage/', '', $page->image_path);
+                if (Storage::disk('public')->exists($relativeImgPath)) {
+                    Storage::disk('public')->delete($relativeImgPath);
+                }
+            }
+
+            // 3. Database Row Deletion
+            $page->delete();
+
+            // 4. PDF REGENERATION (Ascending Order: Page 1 = First Uploaded)
+            $remainingPages = RecordsPageModel::where('file_id', $fileId)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            $base64Images = [];
+            foreach ($remainingPages as $p) {
+                $path = str_replace('storage/', '', $p->image_path);
+                if (Storage::disk('public')->exists($path)) {
+                    $fullPath = storage_path('app/public/' . $path);
+                    $imageData = base64_encode(file_get_contents($fullPath));
+                    $mime = mime_content_type($fullPath);
+                    $base64Images[] = 'data:' . $mime . ';base64,' . $imageData;
+                }
+            }
+
+            // 5. Update PDF on Disk
+            $pdf = Pdf::loadView('pdf.patient-archive', [
+                'category' => $fileRecord->records->record_type,
+                'patient' => $fileRecord->records->patient,
+                'importImages' => $base64Images,
+                'date' => now()->format('m/d/Y'),
+                'records' => []
+            ])->setPaper('a4');
+
+            $relativePdfPath = str_replace('storage/', '', $fileRecord->file_path);
+            Storage::disk('public')->put($relativePdfPath, $pdf->output());
+
+            DB::commit();
+            
+            $this->logActivity('DELETE', "Deleted image page from {$fileRecord->records->record_type} (Patient: {$fileRecord->records->patient->lastname})", 'Medical Records');
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("deleteImage Error: " . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Deletion failed.']);
         }
     }
 }

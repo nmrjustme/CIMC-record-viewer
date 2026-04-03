@@ -86,7 +86,7 @@ export default function AuditLogs({ logs, filters }: Props) {
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest">User</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest">Action</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest">Description</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest">IP Address</th>
+                                {/* <th className="p-4 text-[10px] font-black uppercase tracking-widest">IP Address</th> */}
                                 <th className="p-4 text-right text-[10px] font-black uppercase tracking-widest">Timestamp</th>
                             </tr>
                         </thead>
@@ -107,7 +107,7 @@ export default function AuditLogs({ logs, filters }: Props) {
                                             </span>
                                         </td>
                                         <td className="p-4 text-zinc-600 dark:text-zinc-400">{log.description}</td>
-                                        <td className="p-4 text-zinc-500 italic">{log.ip_address}</td>
+                                        {/* <td className="p-4 text-zinc-500 italic">{log.ip_address}</td> */}
                                         <td className="p-4 text-right text-zinc-500 italic">
                                             {new Date(log.created_at).toLocaleString()}
                                         </td>

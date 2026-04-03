@@ -48,7 +48,7 @@ class PatientsController extends Controller
 
         return redirect()->route('patients.folder');
     }
-
+    
     public function getFiles(Request $request)
     {
         $hrn = $request->input('hrn') ?? session('active_hrn');
@@ -134,7 +134,7 @@ class PatientsController extends Controller
 
         return redirect()->route('patients.create')->with('success', 'Patient record created.');
     }
-
+    
     public function addHRN(PatientStoreRequest $request)
     {
         $validated = $request->validated();

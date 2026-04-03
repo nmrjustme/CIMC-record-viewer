@@ -25,7 +25,7 @@ trait Loggable
                         'action' => $action,
                         'description' => $description,
                         'module' => $module,
-                        'ip_address' => Request::ip(),
+                        // 'ip_address' => Request::ip(),
                         
                   ]);
             }
