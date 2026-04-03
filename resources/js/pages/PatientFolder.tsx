@@ -4,7 +4,7 @@ import Header from '@/components/header';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import PatientArchive from './PatientArchive';
-import { ImagePlus } from 'lucide-react';
+import { ImagePlus, Loader2 } from 'lucide-react';
 
 // --- Interfaces ---
 interface Address {
@@ -109,7 +109,6 @@ export default function PatientFolder({
         hrns: '',
     });
 
-    // --- Memoized Duplicate Check ---
     const isDuplicateCategory = useMemo(() => {
         return records.data.some((record) =>
             record.file_name.toUpperCase().includes(selected.toUpperCase()),
@@ -118,7 +117,7 @@ export default function PatientFolder({
 
     useEffect(() => {
         if (showNotification) {
-            const timer = setTimeout(() => setShowNotification(false), 2000);
+            const timer = setTimeout(() => setShowNotification(false), 3000);
             return () => clearTimeout(timer);
         }
     }, [showNotification]);
@@ -130,25 +129,35 @@ export default function PatientFolder({
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !targetFileId) return;
+        const files = e.target.files;
+        if (!files || files.length === 0 || !targetFileId) return;
+
         setIsLoading(true);
+
+        // We use router.post with multiple files. 
+        // Laravel expects an array if we use 'images[]'
         router.post(
             `/pdf/upload-image/${targetFileId}`,
-            { image: file },
+            { images: Array.from(files) },
             {
                 forceFormData: true,
                 onSuccess: () => {
-                    setNotificationMessage('Image appended to PDF!');
-                    setNotificationType('success');
+                    // Basic fix for spacing and grammar
+                    setNotificationMessage(`${files.length} optimized ${files.length === 1 ? 'image' : 'images'} appended to PDF!`); setNotificationType('success');
                     setShowNotification(true);
                     setPdfVersion((v) => v + 1);
+                },
+                onError: (errors) => {
+                    setNotificationMessage('Upload failed. Check file sizes.');
+                    setNotificationType('error');
+                    setShowNotification(true);
                 },
                 onFinish: () => {
                     setIsLoading(false);
                     setTargetFileId(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
                 },
-            },
+            }
         );
     };
 
@@ -206,15 +215,16 @@ export default function PatientFolder({
             <Head title={`${patient.lastname}'s Records`} />
             {!isAdmin && <Header />}
 
+            {/* Hidden Multiple File Input */}
             <input
                 type="file"
+                multiple
                 ref={fileInputRef}
                 className="hidden"
                 accept="image/*"
                 onChange={handleFileChange}
             />
 
-            {/* Notification Toast */}
             {showNotification && (
                 <div className={`fixed top-5 right-5 z-[250] flex animate-in items-center gap-3 rounded-lg border-l-4 px-6 py-4 font-bold text-white shadow-2xl duration-300 slide-in-from-right-5 fade-in ${notificationType === 'success' ? 'border-green-500 bg-zinc-900' : 'border-red-500 bg-zinc-900'}`}>
                     <div className="flex flex-col">
@@ -235,7 +245,6 @@ export default function PatientFolder({
                     {fromPage === 'add' ? 'Back to Add Page' : 'Back to Search'}
                 </Link>
 
-                {/* Patient Header Card */}
                 <div className="mb-10 overflow-hidden rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)] shadow-sm">
                     <div className="border-b border-[var(--patients-border)] bg-[var(--patients-section-bg)] p-6 md:p-8">
                         <div className="flex flex-col justify-between gap-6 md:flex-row">
@@ -271,7 +280,6 @@ export default function PatientFolder({
                         </div>
                     </div>
 
-                    {/* Patient Info Toggle Area */}
                     <div className={`grid grid-cols-1 transition-all duration-300 ease-in-out md:grid-cols-3 ${isInfoOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}>
                         <div className="flex flex-col border-b border-[var(--patients-border)] p-6 md:border-r md:border-b-0">
                             <h4 className={`${labelClass} mb-4 flex items-center gap-2`}>
@@ -364,8 +372,6 @@ export default function PatientFolder({
                 />
             </main>
 
-            {/* --- MODALS --- */}
-
             {/* HRN MODAL */}
             {isHRNModalOpen && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -430,9 +436,11 @@ export default function PatientFolder({
                             {(isStaff || isAdmin) && (
                                 <button
                                     onClick={() => handleAddImage(selectedRecord.id)}
-                                    className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black uppercase hover:bg-[var(--patients-accent)]"
+                                    disabled={isLoading}
+                                    className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black uppercase hover:bg-[var(--patients-accent)] disabled:opacity-50"
                                 >
-                                    <ImagePlus size={14} /> {isLoading ? 'Appending...' : 'Append Image'}
+                                    {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ImagePlus size={14} />}
+                                    {isLoading ? 'Processing...' : 'Append Images'}
                                 </button>
                             )}
                             <button onClick={() => setSelectedRecord(null)} className="bg-red-600 px-4 py-2 text-[10px] font-black uppercase">Close</button>
