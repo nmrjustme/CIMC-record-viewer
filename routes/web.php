@@ -13,6 +13,8 @@ use App\Http\Controllers\PatientHRNController;
 use App\Http\Controllers\PatientPdfController;
 use App\Http\Controllers\PdfController;
 
+use App\Models\patientsRecord;
+
 // Route::inertia('/', 'welcome', [
 //     'canRegister' => Features::enabled(Features::registration()),
 // ])->name('home');
@@ -45,8 +47,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/pdf/upload-image/{fileId}', [PatientPdfController::class, 'uploadImage'])->name('pdf.upload-image');
         Route::delete('/pdf/delete-file/{id}', [PatientPdfController::class, 'deleteFile'])->name('pdf.delete-file');
         Route::delete('/pdf/delete-image/{pageId}', [PatientPdfController::class, 'deleteImage']);
+
+
+
+        Route::get('/patients-record-types', function () {
+            $categories = patientsRecord::select('record_type')
+                ->distinct()
+                ->orderBy('record_type')
+                ->pluck('record_type');
+
+            return response()->json($categories);
+        });
     });
-    
+
     // Admin Routes
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -67,7 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/activity-logs', [ActivityLogsController::class, 'logs']);
     });
-    
+
     // Staff Routes
     Route::middleware(['role:staff'])->group(function () {});
 });

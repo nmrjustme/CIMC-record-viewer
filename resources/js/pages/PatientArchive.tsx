@@ -68,32 +68,31 @@ export default function PatientArchive({
     handleDeleteRecord,
     setSelectedRecord,
 }: PatientArchiveProps) {
-    
     // PRECISION SORTING: Identifies the ID of the record with the newest updated_at
     const latestFileId = useMemo(() => {
         if (!otherFiles || otherFiles.length === 0) return null;
-        
+
         const sorted = [...otherFiles].sort((a, b) => {
             const timeA = new Date(a.updated_at).getTime();
             const timeB = new Date(b.updated_at).getTime();
             return timeB - timeA; // Descending order
         });
-        
+
         return sorted[0].id;
     }, [otherFiles]);
 
     return (
         <section className="pb-20">
-            <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <h3 className={sectionTitle}>
                     Archive List{' '}
                     {records.last_page > 1 && `(Page ${records.current_page})`}
                 </h3>
-                
+
                 {(isAdmin || isStaff) && (
                     <div className="flex flex-wrap items-center gap-3">
                         {isDuplicate && (
-                            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase text-red-500 bg-red-500/10 px-3 py-2 rounded border border-red-500/20 animate-pulse">
+                            <div className="flex animate-pulse items-center gap-1.5 rounded border border-red-500/20 bg-red-500/10 px-3 py-2 text-[9px] font-black text-red-500 uppercase">
                                 <AlertCircle size={12} />
                                 <span>Category Already Exists</span>
                             </div>
@@ -102,7 +101,7 @@ export default function PatientArchive({
                         <div className="relative">
                             <button
                                 onClick={() => setOpen(!open)}
-                                className="cursor-pointer rounded border border-black bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-black transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white"
+                                className="cursor-pointer rounded border border-black bg-white px-4 py-2 text-[10px] font-black tracking-widest text-black uppercase transition-colors hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white"
                             >
                                 {search || selected} ▾
                             </button>
@@ -111,7 +110,9 @@ export default function PatientArchive({
                                     <input
                                         type="text"
                                         value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        onChange={(e) =>
+                                            setSearch(e.target.value)
+                                        }
                                         placeholder="Type or select..."
                                         className="w-full border-b px-3 py-2 text-xs outline-none dark:bg-transparent dark:text-white"
                                         autoFocus
@@ -119,25 +120,34 @@ export default function PatientArchive({
                                     <div className="max-h-48 overflow-y-auto">
                                         {categories
                                             .filter((cat) =>
-                                                cat.toLowerCase().includes(search.toLowerCase())
+                                                cat
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        search.toLowerCase(),
+                                                    ),
                                             )
                                             .map((cat) => (
                                                 <button
                                                     key={cat}
-                                                    onClick={() => handleSelect(cat)}
+                                                    onClick={() =>
+                                                        handleSelect(cat)
+                                                    }
                                                     className="block w-full px-4 py-2.5 text-left text-[10px] font-bold uppercase hover:bg-gray-100 dark:hover:bg-zinc-800"
                                                 >
                                                     {cat}
                                                 </button>
                                             ))}
-                                        {search && !categories.includes(search) && (
-                                            <button
-                                                onClick={() => handleSelect(search)}
-                                                className="block w-full px-4 py-2 text-left text-[10px] font-black uppercase text-blue-500 hover:bg-blue-50"
-                                            >
-                                                + Add "{search}"
-                                            </button>
-                                        )}
+                                        {search &&
+                                            !categories.includes(search) && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleSelect(search)
+                                                    }
+                                                    className="block w-full px-4 py-2 text-left text-[10px] font-black text-blue-500 uppercase hover:bg-blue-50"
+                                                >
+                                                    + Add "{search}"
+                                                </button>
+                                            )}
                                     </div>
                                 </div>
                             )}
@@ -146,13 +156,17 @@ export default function PatientArchive({
                         <button
                             onClick={handleCreateBlankPdf}
                             disabled={isLoading || isDuplicate}
-                            className={`rounded border px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all duration-200 
-                                ${isDuplicate 
-                                    ? 'cursor-not-allowed border-gray-500 bg-gray-500/20 text-gray-500' 
+                            className={`rounded border px-6 py-2 text-[10px] font-black tracking-widest uppercase transition-all duration-200 ${
+                                isDuplicate
+                                    ? 'cursor-not-allowed border-gray-500 bg-gray-500/20 text-gray-500'
                                     : 'cursor-pointer border-[var(--patients-accent)] bg-[var(--patients-accent)] text-white hover:brightness-90 active:scale-95'
-                                } disabled:opacity-50`}
+                            } disabled:opacity-50`}
                         >
-                            {isLoading ? 'Creating...' : isDuplicate ? 'Existing' : 'Create PDF'}
+                            {isLoading
+                                ? 'Creating...'
+                                : isDuplicate
+                                  ? 'Existing'
+                                  : 'Create PDF'}
                         </button>
                     </div>
                 )}
@@ -162,21 +176,24 @@ export default function PatientArchive({
                 {otherFiles.length > 0 ? (
                     otherFiles.map((file) => {
                         const isLatest = file.id === latestFileId;
-                        
+
                         return (
                             <div
                                 key={file.id}
                                 onClick={() => setSelectedRecord(file)}
-                                className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-lg border p-6 text-center transition-all hover:shadow-lg
-                                    ${isLatest 
-                                        ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/5 ring-2 ring-[var(--patients-accent)]/20 scale-[1.02]' 
+                                className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-lg border p-6 text-center transition-all hover:shadow-lg ${
+                                    isLatest
+                                        ? 'scale-[1.02] border-[var(--patients-accent)] bg-[var(--patients-accent)]/5 ring-2 ring-[var(--patients-accent)]/20'
                                         : 'bg-[var(--patients-section-bg)] hover:border-[var(--patients-accent)]'
-                                    }`}
+                                }`}
                             >
                                 {/* NEW: RECENTLY UPDATED BADGE */}
                                 {isLatest && (
-                                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-[var(--patients-accent)] text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg z-10">
-                                        <Clock size={10} className="animate-pulse" />
+                                    <div className="absolute -top-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full bg-[var(--patients-accent)] px-2 py-0.5 text-[8px] font-black text-white shadow-lg">
+                                        <Clock
+                                            size={10}
+                                            className="animate-pulse"
+                                        />
                                         RECENTLY UPDATED
                                     </div>
                                 )}
@@ -186,25 +203,31 @@ export default function PatientArchive({
                                             e.stopPropagation();
                                             handleToggleMenu(e, file.id);
                                         }}
-                                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-black/5 text-[var(--patients-muted)] hover:text-[var(--patients-accent)] cursor-pointer"
+                                        className="absolute top-2 right-2 cursor-pointer rounded-full p-1.5 text-[var(--patients-muted)] hover:bg-black/5 hover:text-[var(--patients-accent)]"
                                     >
                                         <MoreVertical size={16} />
                                     </button>
                                 )}
 
                                 {openMenuId === file.id && (
-                                    <div className="absolute top-10 right-2 z-20 w-40 animate-in overflow-hidden rounded-md border border-[var(--patients-border)] bg-[var(--patients-section-bg)] shadow-2xl duration-150 fade-in zoom-in slide-in-from-top-2">
+                                    <div className="absolute top-10 right-2 z-20 w-40 animate-in overflow-hidden rounded-md border border-[var(--patients-border)] bg-[var(--patients-section-bg)] shadow-2xl duration-150 fade-in slide-in-from-top-2 zoom-in">
                                         <div className="py-1">
                                             {isAdmin && (
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
-                                                        handleDeleteRecord(file.id, file.file_name);
+                                                        handleDeleteRecord(
+                                                            file.id,
+                                                            file.file_name,
+                                                        );
                                                     }}
-                                                    className="flex w-full items-center px-4 py-2.5 text-[9px] font-black text-red-500 uppercase hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                                                    className="flex w-full cursor-pointer items-center px-4 py-2.5 text-[9px] font-black text-red-500 uppercase transition-colors hover:bg-red-500 hover:text-white"
                                                 >
-                                                    <Trash2 size={14} className="mr-2" />
+                                                    <Trash2
+                                                        size={14}
+                                                        className="mr-2"
+                                                    />
                                                     Delete Permanent
                                                 </button>
                                             )}
@@ -215,16 +238,21 @@ export default function PatientArchive({
                                 <img
                                     src="/images/pdf.png"
                                     alt="PDF"
-                                    className={`mb-4 h-12 w-12 transition-transform duration-300 group-hover:scale-110 
-                                        ${isLatest ? 'opacity-100 drop-shadow-md' : 'opacity-60 group-hover:opacity-100'}`}
+                                    className={`mb-4 h-12 w-12 transition-transform duration-300 group-hover:scale-110 ${isLatest ? 'opacity-100 drop-shadow-md' : 'opacity-60 group-hover:opacity-100'}`}
                                 />
-                                <h4 className="line-clamp-2 min-h-[2.5rem] text-[11px] font-black uppercase tracking-tight group-hover:text-[var(--patients-accent)]">
+                                <h4 className="line-clamp-2 min-h-[2.5rem] text-[11px] font-black tracking-tight uppercase group-hover:text-[var(--patients-accent)]">
                                     {file.file_name}
                                 </h4>
                                 <div className="mt-4 w-full border-t border-[var(--patients-border)] pt-3">
                                     <p className="font-mono text-[9px] font-bold text-[var(--patients-muted)] uppercase">
                                         {/* Shows full time to verify logic during testing */}
-                                        Updated: {new Date(file.updated_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                        Updated:{' '}
+                                        {new Date(
+                                            file.updated_at,
+                                        ).toLocaleString([], {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short',
+                                        })}
                                     </p>
                                 </div>
                             </div>
@@ -233,7 +261,11 @@ export default function PatientArchive({
                 ) : (
                     <div className="col-span-full flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--patients-border)] py-20 text-center">
                         <div className="mb-4 rounded-full bg-[var(--patients-border)]/20 p-4">
-                            <img src="/images/pdf.png" className="h-10 w-10 grayscale opacity-20" alt="" />
+                            <img
+                                src="/images/pdf.png"
+                                className="h-10 w-10 opacity-20 grayscale"
+                                alt=""
+                            />
                         </div>
                         <p className="text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
                             No archived records found
@@ -249,13 +281,13 @@ export default function PatientArchive({
                             key={index}
                             href={link.url || '#'}
                             dangerouslySetInnerHTML={{ __html: link.label }}
-                            className={`flex h-9 min-w-[36px] items-center justify-center rounded px-3 text-[10px] font-black uppercase transition-all
-                                ${link.active 
-                                    ? 'bg-[var(--patients-accent)] text-white shadow-lg' 
-                                    : link.url 
-                                        ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-muted)] hover:border-[var(--patients-accent)] hover:text-[var(--patients-accent)]' 
-                                        : 'cursor-not-allowed opacity-20'
-                                }`}
+                            className={`flex h-9 min-w-[36px] items-center justify-center rounded px-3 text-[10px] font-black uppercase transition-all ${
+                                link.active
+                                    ? 'bg-[var(--patients-accent)] text-white shadow-lg'
+                                    : link.url
+                                      ? 'border border-[var(--patients-border)] bg-[var(--patients-section-bg)] text-[var(--patients-muted)] hover:border-[var(--patients-accent)] hover:text-[var(--patients-accent)]'
+                                      : 'cursor-not-allowed opacity-20'
+                            }`}
                             preserveScroll
                         />
                     ))}

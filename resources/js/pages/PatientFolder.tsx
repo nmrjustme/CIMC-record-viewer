@@ -6,6 +6,8 @@ import type { BreadcrumbItem } from '@/types';
 import PatientArchive from './PatientArchive';
 import { FileText, ImagePlus, Loader2 } from 'lucide-react';
 
+import axios from 'axios';
+
 // --- Interfaces ---
 interface Address {
     id: number;
@@ -97,6 +99,14 @@ export default function PatientFolder({
         'LABORATORY',
         'RADIO',
     ]);
+    // const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        axios
+            .get('/patients-record-types')
+            .then((res) => setCategories(res.data))
+            .catch((err) => console.error('Failed to fetch categories:', err));
+    }, []);
 
     const [isLoading, setIsLoading] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
