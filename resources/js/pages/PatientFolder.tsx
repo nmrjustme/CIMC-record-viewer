@@ -4,7 +4,7 @@ import Header from '@/components/header';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import PatientArchive from './PatientArchive';
-import { ImagePlus, Loader2 } from 'lucide-react';
+import { FileText, ImagePlus, Loader2 } from 'lucide-react';
 
 // --- Interfaces ---
 interface Address {
@@ -91,11 +91,13 @@ export default function PatientFolder({
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState('OPD RECORD');
     const [search, setSearch] = useState('');
+
     const [categories, setCategories] = useState([
         'OPD RECORD',
         'LABORATORY',
         'RADIO',
     ]);
+
     const [isLoading, setIsLoading] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
     const [notificationMessage, setNotificationMessage] = useState('');
@@ -106,6 +108,9 @@ export default function PatientFolder({
     const [targetFileId, setTargetFileId] = useState<number | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
+
     const isAdmin = auth.user.role === 'admin';
     const isStaff = auth.user.role === 'staff';
 
@@ -138,42 +143,45 @@ export default function PatientFolder({
         if (!files || files.length === 0 || !targetFileId) return;
 
         setIsLoading(true);
+        setUploadProgress(0); // Reset progress
 
         router.post(
             `/pdf/upload-image/${targetFileId}`,
             { images: Array.from(files) },
             {
                 forceFormData: true,
+                onProgress: (progress) => {
+                    if (progress && progress.percentage !== undefined) {
+                        setUploadProgress(progress.percentage);
+                    }
+                },
                 onSuccess: (page) => {
-                    // 1. Get the fresh records from the server response
                     const updatedRecords = (
                         page.props.records as PaginatedRecords
                     ).data;
-
-                    // 2. Find the record we just updated
                     const freshRecord = updatedRecords.find(
                         (r) => r.id === targetFileId,
                     );
 
-                    // 3. Update the local state so the sidebar re-renders immediately
                     if (freshRecord) {
                         setSelectedRecord(freshRecord);
                     }
 
                     setNotificationMessage(
-                        `${files.length} optimized ${files.length === 1 ? 'image' : 'images'} appended to PDF!`,
+                        `${files.length} images appended to PDF!`,
                     );
                     setNotificationType('success');
                     setShowNotification(true);
                     setPdfVersion((v) => v + 1);
                 },
-                onError: (errors) => {
+                onError: () => {
                     setNotificationMessage('Upload failed. Check file sizes.');
                     setNotificationType('error');
                     setShowNotification(true);
                 },
                 onFinish: () => {
                     setIsLoading(false);
+                    setUploadProgress(0); // Clear progress
                     setTargetFileId(null);
                     if (fileInputRef.current) fileInputRef.current.value = '';
                 },
@@ -287,7 +295,11 @@ export default function PatientFolder({
 
             {showNotification && (
                 <div
-                    className={`fixed top-5 right-5 z-[250] flex animate-in items-center gap-3 rounded-lg border-l-4 px-6 py-4 font-bold text-white shadow-2xl duration-300 slide-in-from-right-5 fade-in ${notificationType === 'success' ? 'border-green-500 bg-zinc-900' : 'border-red-500 bg-zinc-900'}`}
+                    className={`fixed right-5 bottom-5 z-[250] flex animate-in items-center gap-3 rounded-lg border-l-4 px-6 py-4 font-bold text-white shadow-2xl duration-300 slide-in-from-bottom-5 fade-in ${
+                        notificationType === 'success'
+                            ? 'border-green-500 bg-zinc-900'
+                            : 'border-red-500 bg-zinc-900'
+                    }`}
                 >
                     <div className="flex flex-col">
                         <span className="text-[10px] tracking-widest uppercase opacity-50">
@@ -723,6 +735,41 @@ export default function PatientFolder({
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+            {/* Upload Progress Overlay */}
+            {isLoading && uploadProgress > 0 && (
+                <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md p-6">
+                        <div className="mb-2 flex items-end justify-between">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black tracking-widest text-white uppercase opacity-60">
+                                    Uploading Files
+                                </span>
+                                <span className="text-lg font-bold text-white">
+                                    {uploadProgress === 100
+                                        ? 'Processing...'
+                                        : `${uploadProgress}% Complete`}
+                                </span>
+                            </div>
+                            <Loader2
+                                className="animate-spin text-[var(--patients-accent)]"
+                                size={24}
+                            />
+                        </div>
+
+                        {/* Progress Bar Container */}
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                            <div
+                                className="h-full bg-[var(--patients-accent)] transition-all duration-300 ease-out"
+                                style={{ width: `${uploadProgress}%` }}
+                            />
+                        </div>
+                        <p className="mt-3 text-center text-[10px] font-bold tracking-tighter text-white/40 uppercase">
+                            Please do not close the tab while optimizing and
+                            merging images...
+                        </p>
                     </div>
                 </div>
             )}
