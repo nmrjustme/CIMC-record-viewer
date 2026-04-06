@@ -14,11 +14,11 @@ class PatientRecordResource extends JsonResource
         return [
             'id'            => $this->id,
             'file_name'     => $this->record_type ?? 'Unnamed File',
-
+            
             // CRITICAL: We take the updated_at from the file, not just the record
             // This ensures 2026-04-02 16:49:32.763 is sent correctly
             'updated_at'    => $latestFile ? $latestFile->updated_at->toISOString() : $this->updated_at->toISOString(),
-
+            
             'created_at'    => $this->created_at->toISOString(),
             'pdf_url'       => $latestFile ? asset($latestFile->file_path) : null,
             'total'         => $this->file->count(),

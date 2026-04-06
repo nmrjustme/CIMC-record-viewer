@@ -33,7 +33,7 @@ interface FileRecord {
     created_at: string;
     updated_at: string;
     total?: number;
-    pages?: { id: number; image_path: string }[];
+    pages?: { id: number; image_path: string; [key: string]: any }[];
 }
 
 interface PaginationLinks {
@@ -630,7 +630,6 @@ export default function PatientFolder({
                     </div>
                 </div>
             )}
-
             {/* PDF VIEWER MODAL */}
             {selectedRecord && (
                 <div className="fixed inset-0 z-[100] flex flex-col bg-black/90 backdrop-blur-sm">
@@ -657,7 +656,6 @@ export default function PatientFolder({
                     </div>
 
                     <div className="flex flex-1 overflow-hidden">
-                        {/* The PDF Document */}
                         <div className="flex-1 bg-zinc-800">
                             <iframe
                                 key={pdfVersion}
@@ -666,35 +664,62 @@ export default function PatientFolder({
                             />
                         </div>
 
-                        {/* RIGHT SIDEBAR: Page List */}
+                        {/* CORRECTED RIGHT SIDEBAR */}
                         {(isAdmin || isStaff) && (
                             <div className="hidden w-72 overflow-y-auto border-l border-white/10 bg-black/50 p-4 md:block">
                                 <h3 className="mb-4 text-[9px] font-black tracking-widest text-white/40 uppercase">
                                     PDF Pages
                                 </h3>
                                 <div className="space-y-4">
-                                    {selectedRecord.pages?.map((page, idx) => (
-                                        <div
-                                            key={page.id}
-                                            className="group relative rounded border border-white/10 bg-white/5 p-2 transition-all hover:bg-white/10"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[8px] font-bold text-white/30">
-                                                    PAGE {idx + 1}
-                                                </span>
-                                                <button
-                                                    onClick={() =>
-                                                        handleDeleteImage(
-                                                            page.id,
-                                                        )
-                                                    }
-                                                    className="cursor-pointer text-[9px] font-black text-red-500 uppercase hover:text-red-400"
-                                                >
-                                                    Remove
-                                                </button>
+                                    {selectedRecord.pages?.map((page, idx) => {
+                                        // Detect if this is a valid image or a placeholder
+                                        const isBrokenImage =
+                                            !page.image_path ||
+                                            page.image_path.endsWith('/');
+
+                                        return (
+                                            <div
+                                                key={page.id}
+                                                className="group relative rounded border border-white/10 bg-white/5 p-2 transition-all hover:bg-white/10"
+                                            >
+                                                <div className="mb-2 flex aspect-[3/4] w-full items-center justify-center overflow-hidden rounded bg-zinc-900">
+                                                    {!isBrokenImage ? (
+                                                        <img
+                                                            src={
+                                                                page.image_path
+                                                            }
+                                                            alt={`Page ${idx + 1}`}
+                                                            className="h-full w-full object-cover opacity-80 group-hover:opacity-100"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex flex-col items-center gap-2 text-white/20">
+                                                            <FileText
+                                                                size={32}
+                                                            />
+                                                            <span className="text-[9px] font-black uppercase">
+                                                                Cover Page
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[8px] font-bold text-white/30">
+                                                        PAGE {idx + 1}
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDeleteImage(
+                                                                page.id,
+                                                            )
+                                                        }
+                                                        className="cursor-pointer text-[9px] font-black text-red-500 uppercase hover:text-red-400"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

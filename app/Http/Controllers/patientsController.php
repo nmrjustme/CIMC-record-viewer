@@ -100,7 +100,7 @@ class PatientsController extends Controller
     public function store(PatientStoreRequest $request)
     {
         $validated = $request->validated();
-
+        
         $patient = DB::transaction(function () use ($validated) {
             $patient = patients::create([
                 'hrn'        => $validated['hrn'],
@@ -109,7 +109,7 @@ class PatientsController extends Controller
                 'lastname'   => $validated['lastname'],
                 'created_by' => Auth::id(),
             ]);
-
+            
             $info = $patient->information()->create([ // Using relationship
                 'sex'            => $validated['sex'],
                 'civil_status'   => $validated['civil_status'],
