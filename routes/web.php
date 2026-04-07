@@ -48,6 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/pdf/delete-file/{id}', [PatientPdfController::class, 'deleteFile'])->name('pdf.delete-file');
         Route::delete('/pdf/delete-image/{pageId}', [PatientPdfController::class, 'deleteImage']);
 
+        Route::put('/hrns/{id}', [patientsController::class, 'update']);
+        Route::get('/patients/{patient}/edit', [patientsController::class, 'edit'])->name('patients.edit');
+        Route::put('/patients/{patient}', [patientsController::class, 'update'])->name('patients.update');
+
 
 
         Route::get('/patients-record-types', function () {
