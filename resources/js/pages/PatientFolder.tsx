@@ -716,7 +716,7 @@ export default function PatientFolder({
                                                     selectedRecord.id,
                                                 )
                                             }
-                                            className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-blue-600"
+                                            className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-blue-600 cursor-pointer"
                                         >
                                             <ImagePlus size={14} /> Add Image
                                         </button>
