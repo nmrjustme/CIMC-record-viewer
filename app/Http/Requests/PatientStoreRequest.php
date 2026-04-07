@@ -27,7 +27,7 @@ class PatientStoreRequest extends FormRequest
             'firstname'      => 'required|string|max:50',
             'lastname'       => 'required|string|max:50',
             'middlename'     => 'nullable|string|max:50',
-            'hrn'            => ['required', 'string', Rule::unique('patients', 'hrn')->ignore($this->route('patient') ?? $this->patient_id)],
+            'hrn'            => ['required', 'string', Rule::unique('patients', 'hrn')],
             'sex'            => 'required|in:Male,Female',
             'civil_status'   => 'required|string|max:20',
             'nationality'    => 'required|string|max:50',
