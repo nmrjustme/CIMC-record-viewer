@@ -70,7 +70,7 @@ class PatientsController extends Controller
             ->latest()
             ->paginate(50);
 
-            // dd($records->toArray());
+        // dd($records->toArray());
 
         return Inertia::render('PatientFolder', [
             'patient'  => $patient,
@@ -79,6 +79,7 @@ class PatientsController extends Controller
             'fromPage' => session('folder_source', 'search')
         ]);
     }
+
     public function create(Request $request)
     {
         $patients = patients::query()
@@ -150,17 +151,90 @@ class PatientsController extends Controller
         return back()->with('success', 'New HRN added successfully.');
     }
 
-    public function update(Request $request, $id)
+    public function update_hrns(Request $request, $id)
     {
         $request->validate([
             'hrn' => 'required|digits:15|unique:patient_hrns,hrn,' . $id,
         ]);
 
-        $hrn = PatientHRN::findOrFail($id);
+        $hrn = PatientHRN::with('patient')->findOrFail($id);
+        $oldHrn = $hrn->hrn;
         $hrn->update([
             'hrn' => $request->hrn,
         ]);
 
+        $this->logActivity(
+            'UPDATE',
+            "Updated secondary HRN from {$oldHrn} to {$request->hrn} (Name: {$hrn->patient->lastname} {$hrn->patient->firstname})",
+            'Patient HRN'
+        );
+
         return back()->with('success', 'HRN updated successfully.');
+    }
+
+    public function update_primary(Request $request, $id)
+    {
+        $patient = patients::findOrFail($id);
+
+        $request->validate([
+            'hrn' => 'required|string|max:15|unique:patients,hrn,' . $patient->id,
+        ]);
+        $oldHrn = $patient->hrn;
+
+        $newHrn = $request->hrn;
+
+        $patient->update([
+            'hrn' => $newHrn
+        ]);
+
+        $this->logActivity(
+            'UPDATE',
+            "Updated primary HRN for {$patient->lastname} {$patient->firstname} from {$oldHrn} to {$newHrn}",
+            'Patient Management'
+        );
+
+        session(['active_hrn' => $newHrn]);
+
+        return back()->with('message', 'Primary HRN updated successfully.');
+    }
+
+    // Add this to PatientsController.php
+
+    public function update(PatientStoreRequest $request, $id)
+    {
+        $validated = $request->validated();
+        $patient = patients::findOrFail($id);
+
+        DB::transaction(function () use ($validated, $patient) {
+            // 1. Update Basic Info
+            $patient->update([
+                'firstname'  => $validated['firstname'],
+                'middlename' => $validated['middlename'],
+                'lastname'   => $validated['lastname'],
+            ]);
+            
+            // 2. Update Information
+            $patient->information()->update([
+                'sex'            => $validated['sex'],
+                'civil_status'   => $validated['civil_status'],
+                'nationality'    => $validated['nationality'],
+                'birthdate'      => $validated['birthdate'],
+                'place_of_birth' => $validated['place_of_birth'],
+                'phone_number'   => $validated['phone_number'],
+                'religion'       => $validated['religion'],
+            ]);
+
+            // 3. Update Address
+            $patient->information->address()->update([
+                'street'       => $validated['street'],
+                'barangay'     => $validated['barangay'],
+                'municipality' => $validated['municipality'],
+                'province'     => $validated['province'],
+            ]);
+        });
+
+        $this->logActivity('UPDATE', "Updated details for: {$patient->lastname}, {$patient->firstname}", 'Patient Management');
+
+        return back()->with('success', 'Patient information updated successfully.');
     }
 }

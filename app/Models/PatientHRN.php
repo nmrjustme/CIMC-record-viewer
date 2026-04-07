@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PatientHRN extends Model
 {
     protected $table = 'patient_hrns';
-
+    
     protected $fillable = [
         'patient_id',
         'hrn',

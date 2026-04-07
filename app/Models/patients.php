@@ -24,7 +24,7 @@ class patients extends Model
     {
         return $this->hasOne(patientsInfo::class, 'patient_id');
     }
-
+    
     public function hrns()
     {
         return $this->hasMany(PatientHRN::class, 'patient_id');

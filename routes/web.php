@@ -36,7 +36,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // This handles the display and the browser REFRESH (GET)
         Route::get('/folder', [patientsController::class, 'getFiles'])->name('folder');
     });
-
+    Route::put('/primary/update/{id}', [patientsController::class, 'update_primary']);
+    
     Route::middleware(['role:admin,staff'])->group(function () {
         Route::post('/patients/add-hrn', [patientsController::class, 'addHRN'])
                 ->name('patients.add-hrn');
@@ -48,18 +49,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/pdf/delete-file/{id}', [PatientPdfController::class, 'deleteFile'])->name('pdf.delete-file');
         Route::delete('/pdf/delete-image/{pageId}', [PatientPdfController::class, 'deleteImage']);
 
-        Route::put('/hrns/{id}', [patientsController::class, 'update']);
+        Route::put('/hrns/{id}', [patientsController::class, 'update_hrns']);
+        
         Route::get('/patients/{patient}/edit', [patientsController::class, 'edit'])->name('patients.edit');
         Route::put('/patients/{patient}', [patientsController::class, 'update'])->name('patients.update');
 
-
-
+        
         Route::get('/patients-record-types', function () {
             $categories = patientsRecord::select('record_type')
                 ->distinct()
                 ->orderBy('record_type')
                 ->pluck('record_type');
-
+            
             return response()->json($categories);
         });
     });

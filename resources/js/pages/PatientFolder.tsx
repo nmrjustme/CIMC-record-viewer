@@ -100,8 +100,42 @@ export default function PatientFolder({
         'RADIO',
     ]);
 
-    const [editingHRNId, setEditingHRNId] = useState(null);
-    const [editingValue, setEditingValue] = useState('');
+    // Change these lines in your State section:
+    const [editingHRNId, setEditingHRNId] = useState<number | 'primary' | null>(
+        null,
+    );
+    const [editingValue, setEditingValue] = useState<string>('');
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const editForm = useForm({
+        firstname: patient.firstname || '',
+        lastname: patient.lastname || '',
+        middlename: patient.middlename || '',
+        hrn: patient.hrn || '',
+        sex: (patient as any).information?.sex || 'Male',
+        civil_status: patient.information?.civil_status || '',
+        nationality: patient.information?.nationality || '',
+        birthdate: patient.information?.birthdate || '',
+        place_of_birth: patient.information?.place_of_birth || '',
+        phone_number: patient.information?.phone_number || '',
+        religion: patient.information?.religion || '',
+        street: patient.information?.address?.street || '',
+        barangay: patient.information?.address?.barangay || '',
+        municipality: patient.information?.address?.municipality || '',
+        province: patient.information?.address?.province || '',
+    });
+
+    const handleUpdatePatient = (e: React.FormEvent) => {
+        e.preventDefault();
+        editForm.put(`/patients/${patient.id}`, {
+            onSuccess: () => {
+                // setIsEditModalOpen(false);
+                setNotificationMessage('Patient details updated.');
+                setNotificationType('success');
+                setShowNotification(true);
+            },
+        });
+    };
 
     useEffect(() => {
         axios
@@ -109,6 +143,12 @@ export default function PatientFolder({
             .then((res) => setCategories(res.data))
             .catch((err) => console.error('Failed to fetch categories:', err));
     }, []);
+
+    useEffect(() => {
+        if (isEditModalOpen) {
+            editForm.reset();
+        }
+    }, [isEditModalOpen]);
 
     const [isLoading, setIsLoading] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
@@ -319,25 +359,78 @@ export default function PatientFolder({
         }
     };
 
-    const labelClass =
-        'text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase';
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: "Patient's Folder", href: '/viewer/record-finder' },
-    ];
-
-    const updateHRN = (id) => {
+    const handleupdateHRN = (id: number) => {
         router.put(
             `/hrns/${id}`,
             { hrn: editingValue },
             {
+                preserveScroll: true, // Keep the user's place in the modal
                 onSuccess: () => {
                     setEditingHRNId(null);
                     setEditingValue('');
+
+                    // Show a success notification
+                    setNotificationMessage('HRN updated successfully');
+                    setNotificationType('success');
+                    setShowNotification(true);
+                },
+                onError: (err) => {
+                    setNotificationMessage(
+                        (Object.values(err)[0] as string) || 'Update failed',
+                    );
+                    setNotificationType('error');
+                    setShowNotification(true);
                 },
             },
         );
     };
 
+    const updatePrimaryHRN = (id: number) => {
+        router.put(
+            `/primary/update/${id}`,
+            { hrn: editingValue },
+            {
+                preserveScroll: true, // Keep the user's place in the modal
+                onSuccess: () => {
+                    setEditingHRNId(null);
+                    setEditingValue('');
+
+                    // Show a success notification
+                    setNotificationMessage('Primary HRN updated successfully');
+                    setNotificationType('success');
+                    setShowNotification(true);
+                },
+                onError: (err) => {
+                    setNotificationMessage(
+                        (Object.values(err)[0] as string) || 'Update failed',
+                    );
+                    setNotificationType('error');
+                    setShowNotification(true);
+                },
+            },
+        );
+    };
+
+    const labelClass =
+        'text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase';
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: "Patient's Folder", href: '/viewer/record-finder' },
+    ];
+    const calculateAge = (birthdate: string | undefined) => {
+        if (!birthdate) return 'N/A';
+        const today = new Date();
+        const birthDate = new Date(birthdate);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+            age--;
+        }
+        return age;
+    };
     const pageContent = (
         <div className="min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title={`${patient.lastname}'s Records`} />
@@ -355,19 +448,62 @@ export default function PatientFolder({
 
             {showNotification && (
                 <div
-                    className={`fixed top-5 left-5 z-[250] flex animate-in items-center gap-3 rounded-lg border-l-4 px-6 py-4 font-bold text-white shadow-2xl duration-300 slide-in-from-top-5 fade-in ${
-                        notificationType === 'success'
-                            ? 'border-green-500 bg-zinc-900'
-                            : 'border-red-500 bg-zinc-900'
+                    className={`fixed top-4 right-4 z-[250] transform transition-all duration-500 md:top-24 md:right-8 ${
+                        showNotification
+                            ? 'translate-x-0 opacity-100'
+                            : 'pointer-events-none translate-x-full opacity-0'
                     }`}
                 >
-                    <div className="flex flex-col">
-                        <span className="text-[10px] tracking-widest uppercase opacity-50">
-                            System Message
-                        </span>
-                        <span className="text-sm tracking-tight">
-                            {notificationMessage}
-                        </span>
+                    <div className="flex items-center gap-4 rounded border border-[var(--patients-border)] bg-[var(--patients-section-bg)] p-4 shadow-xl">
+                        {/* Dynamic Icon Circle */}
+                        <div
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-lg dark:text-black ${
+                                notificationType === 'success'
+                                    ? 'bg-green-500'
+                                    : 'bg-red-500'
+                            }`}
+                        >
+                            {notificationType === 'success' ? (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            )}
+                        </div>
+
+                        {/* Text Content */}
+                        <div>
+                            <h4 className="text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                System Message
+                            </h4>
+                            <p className="text-sm font-bold text-[var(--patients-text)]">
+                                {notificationMessage}
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
@@ -430,12 +566,17 @@ export default function PatientFolder({
                                     </span>
                                 </p>
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setIsHRNModalOpen(true)}
-                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--button-border)] px-4 py-1.5 text-sm font-medium hover:border-[var(--button-border-hover)] dark:bg-gray-800"
-                                    >
-                                        Edit Patient
-                                    </button>
+                                    {(isAdmin || isStaff) && (
+                                        <button
+                                            onClick={() =>
+                                                setIsEditModalOpen(true)
+                                            }
+                                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--button-border)] px-4 py-1.5 text-sm font-medium hover:border-[var(--button-border-hover)] dark:bg-gray-800"
+                                        >
+                                            Edit Patient
+                                        </button>
+                                    )}
+
                                     <button
                                         onClick={() => setIsHRNModalOpen(true)}
                                         className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--button-border)] px-4 py-1.5 text-sm font-medium hover:border-[var(--button-border-hover)] dark:bg-gray-800"
@@ -477,6 +618,7 @@ export default function PatientFolder({
                                 </div>
                             </div>
                         </div>
+
                         <div className="flex flex-col border-b border-[var(--patients-border)] p-6 md:border-r md:border-b-0">
                             <h4
                                 className={`${labelClass} mb-4 flex items-center gap-2`}
@@ -485,19 +627,39 @@ export default function PatientFolder({
                                 Birth & Religion
                             </h4>
                             <div className="space-y-4">
-                                <div>
-                                    <p className={labelClass}>Birthday</p>
-                                    <p className="text-sm font-black uppercase">
-                                        {patient.information?.birthdate
-                                            ? new Date(
-                                                  patient.information.birthdate,
-                                              ).toLocaleDateString('en-US', {
-                                                  month: 'long',
-                                                  day: 'numeric',
-                                                  year: 'numeric',
-                                              })
-                                            : 'NOT PROVIDED'}
-                                    </p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className={labelClass}>Birthday</p>
+                                        <p className="text-sm font-black uppercase">
+                                            {patient.information?.birthdate
+                                                ? new Date(
+                                                      patient.information
+                                                          .birthdate,
+                                                  ).toLocaleDateString(
+                                                      'en-US',
+                                                      {
+                                                          month: 'short',
+                                                          day: 'numeric',
+                                                          year: 'numeric',
+                                                      },
+                                                  )
+                                                : 'NOT PROVIDED'}
+                                        </p>
+                                    </div>
+                                    {/* AUTO COMPUTE AGE & DISPLAY SEX */}
+                                    <div>
+                                        <p className={labelClass}>Sex / Age</p>
+                                        <p className="text-sm font-black uppercase">
+                                            {(patient as any).information
+                                                ?.sex || 'N/A'}
+                                            <span className="mx-2 text-[var(--patients-muted)]">
+                                                |
+                                            </span>
+                                            {calculateAge(
+                                                patient.information?.birthdate,
+                                            )}{' '}
+                                        </p>
+                                    </div>
                                 </div>
                                 <div>
                                     <p className={labelClass}>Religion</p>
@@ -508,6 +670,7 @@ export default function PatientFolder({
                                 </div>
                             </div>
                         </div>
+
                         <div className="flex flex-col p-6">
                             <h4
                                 className={`${labelClass} mb-4 flex items-center gap-2`}
@@ -604,9 +767,11 @@ export default function PatientFolder({
 
             {/* HRN MODAL */}
             {isHRNModalOpen && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-lg bg-[var(--patients-section-bg)] p-6 shadow-xl">
-                        <div className="mb-4 flex items-center justify-between">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+                    {/* Added 'max-h-[90vh]' and 'flex flex-col' to the main card */}
+                    <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-[var(--patients-section-bg)] shadow-xl">
+                        {/* Header: Kept outside the scroll area so it's always visible */}
+                        <div className="flex items-center justify-between border-b border-[var(--patients-border)] p-6">
                             <h2 className="text-sm font-black tracking-widest text-[var(--patients-accent)] uppercase">
                                 HRN Records
                             </h2>
@@ -617,157 +782,219 @@ export default function PatientFolder({
                                 Close
                             </button>
                         </div>
-                        <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
-                            <label
-                                className={`${labelClass} mb-1 block opacity-60`}
-                            >
-                                Existing HRNs
-                            </label>
-                            {patient.hrns.map((h) => (
+
+                        {/* Scrollable Content Area */}
+                        <div className="custom-scrollbar flex-1 overflow-y-auto p-6">
+                            {/* PRIMARY HRN SECTION */}
+                            <div className="mb-6">
+                                <label
+                                    className={`${labelClass} mb-2 block opacity-60`}
+                                >
+                                    Primary HRN
+                                </label>
+
                                 <div
-                                    key={h.id}
-                                    className={`flex items-center justify-between rounded border px-3 py-2 font-mono text-xs ${
-                                        h.hrn === patient.hrn
-                                            ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10'
-                                            : 'border-[var(--patients-border)]'
+                                    className={`flex items-center justify-between rounded border px-3 py-3 font-mono text-sm ${
+                                        editingHRNId === 'primary'
+                                            ? 'border-blue-500 bg-blue-500/5'
+                                            : 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10'
                                     }`}
                                 >
-                                    {/* LEFT SIDE */}
-                                    {editingHRNId === h.id ? (
-                                        <input
-                                            type="text"
-                                            value={editingValue}
-                                            onChange={(e) => {
-                                                const val =
-                                                    e.target.value.replace(
-                                                        /\D/g,
-                                                        '',
-                                                    );
-                                                if (val.length <= 15)
-                                                    setEditingValue(val);
-                                            }}
-                                            className="w-full rounded border px-2 py-1 text-xs"
-                                        />
-                                    ) : (
-                                        <span
-                                            className={
-                                                h.hrn === patient.hrn
-                                                    ? 'font-black text-[var(--patients-accent)]'
-                                                    : ''
-                                            }
-                                        >
-                                            {h.hrn}
-                                        </span>
-                                    )}
-
-                                    {/* RIGHT SIDE ACTIONS */}
-                                    <div className="ml-2 flex items-center gap-2">
-                                        {h.hrn === patient.hrn && (
-                                            <span className="text-[8px] font-black text-[var(--patients-accent)] uppercase">
-                                                Main
-                                            </span>
-                                        )}
-
-                                        {(isAdmin || isStaff) && (
-                                            <>
-                                                {editingHRNId === h.id ? (
-                                                    <>
-                                                        <button
-                                                            onClick={() =>
-                                                                updateHRN(h.id)
-                                                            }
-                                                            className="text-[9px] text-green-500 hover:underline"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                        <button
-                                                            onClick={() =>
-                                                                setEditingHRNId(
-                                                                    null,
-                                                                )
-                                                            }
-                                                            className="text-[9px] text-gray-400 hover:underline"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingHRNId(
-                                                                h.id,
-                                                            );
-                                                            setEditingValue(
-                                                                h.hrn,
-                                                            );
-                                                        }}
-                                                        className="text-[9px] text-blue-500 hover:underline"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        {(isAdmin || isStaff) && (
-                            <>
-                                <div className="my-6 border-t border-dashed border-[var(--patients-border)]" />
-                                <h2 className="mb-4 text-[10px] font-black tracking-widest text-[var(--patients-accent)] uppercase">
-                                    Register New HRN
-                                </h2>
-                                <form
-                                    onSubmit={submitHRN}
-                                    className="space-y-4"
-                                >
-                                    <div>
-                                        <label className={labelClass}>
-                                            HRN Number
-                                        </label>
-                                        <input
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={data.hrns}
-                                            onChange={(e) => {
-                                                const val =
-                                                    e.target.value.replace(
-                                                        /\D/g,
-                                                        '',
-                                                    );
-                                                if (val.length <= 15)
-                                                    setData('hrns', val);
-                                            }}
-                                            className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm focus:border-[var(--patients-accent)] focus:outline-none"
-                                            placeholder="Enter 15-digit HRN..."
-                                            required
-                                        />
-                                        <div className="mt-1 flex justify-between">
-                                            {errors.hrns && (
-                                                <p className="text-[10px] font-bold text-red-500 uppercase">
-                                                    {errors.hrns}
-                                                </p>
-                                            )}
-                                            <span
-                                                className={`text-[9px] uppercase ${data.hrns.length === 15 ? 'text-green-500' : 'text-gray-400'}`}
-                                            >
-                                                {data.hrns.length} / 15
-                                            </span>
+                                    {editingHRNId === 'primary' ? (
+                                        <div className="flex w-full flex-col gap-2">
+                                            <input
+                                                type="text"
+                                                value={editingValue}
+                                                autoFocus
+                                                onChange={(e) => {
+                                                    const val =
+                                                        e.target.value.replace(
+                                                            /\D/g,
+                                                            '',
+                                                        );
+                                                    if (val.length <= 15)
+                                                        setEditingValue(val);
+                                                }}
+                                                className="w-full rounded border border-blue-500 bg-zinc-900 px-2 py-1 text-white outline-none"
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() =>
+                                                        updatePrimaryHRN(
+                                                            patient.id,
+                                                        )
+                                                    }
+                                                    className="cursor-pointer text-[10px] font-black text-green-500 uppercase hover:underline"
+                                                >
+                                                    Save Primary
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        setEditingHRNId(null)
+                                                    }
+                                                    className="cursor-pointer text-[10px] font-black text-gray-400 uppercase hover:underline"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="w-full cursor-pointer bg-[var(--patients-accent)] px-4 py-2.5 text-[10px] font-black text-white uppercase transition-all hover:brightness-90 disabled:opacity-50"
+                                    ) : (
+                                        <>
+                                            <span className="font-black text-[var(--patients-accent)]">
+                                                {patient.hrn}
+                                            </span>
+                                            {(isAdmin || isStaff) && (
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingHRNId(
+                                                            'primary',
+                                                        );
+                                                        setEditingValue(
+                                                            patient.hrn,
+                                                        );
+                                                    }}
+                                                    className="cursor-pointer text-[10px] font-black text-blue-500 hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="my-4 border-t border-[var(--patients-border)]" />
+
+                            {/* SECONDARY HRNS SECTION */}
+                            <label
+                                className={`${labelClass} mb-2 block opacity-60`}
+                            >
+                                Linked HRNs (Alias/Previous)
+                            </label>
+
+                            <div className="space-y-2">
+                                {patient.hrns && patient.hrns.length > 0 ? (
+                                    patient.hrns.map((h) => (
+                                        <div
+                                            key={h.id}
+                                            className="flex items-center justify-between rounded border border-[var(--patients-border)] px-3 py-2 font-mono text-xs transition-colors hover:bg-white/5"
+                                        >
+                                            {editingHRNId === h.id ? (
+                                                <input
+                                                    type="text"
+                                                    value={editingValue}
+                                                    autoFocus
+                                                    onChange={(e) => {
+                                                        const val =
+                                                            e.target.value.replace(
+                                                                /\D/g,
+                                                                '',
+                                                            );
+                                                        if (val.length <= 15)
+                                                            setEditingValue(
+                                                                val,
+                                                            );
+                                                    }}
+                                                    className="w-full rounded border border-[var(--patients-accent)] bg-zinc-900 px-2 py-1 text-xs text-white outline-none"
+                                                />
+                                            ) : (
+                                                <span>{h.hrn}</span>
+                                            )}
+                                            <div className="ml-2 flex items-center gap-2">
+                                                {(isAdmin || isStaff) &&
+                                                    (editingHRNId === h.id ? (
+                                                        <>
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleupdateHRN(
+                                                                        h.id,
+                                                                    )
+                                                                }
+                                                                className="text-[9px] font-bold text-green-500"
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                onClick={() =>
+                                                                    setEditingHRNId(
+                                                                        null,
+                                                                    )
+                                                                }
+                                                                className="text-[9px] font-bold text-gray-400"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingHRNId(
+                                                                    h.id,
+                                                                );
+                                                                setEditingValue(
+                                                                    h.hrn,
+                                                                );
+                                                            }}
+                                                            className="text-[9px] font-bold text-blue-500"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="py-4 text-center text-[10px] text-[var(--patients-muted)] italic">
+                                        No secondary HRNs found.
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* REGISTER NEW HRN FORM */}
+                            {(isAdmin || isStaff) && (
+                                <>
+                                    <div className="my-6 border-t border-dashed border-[var(--patients-border)]" />
+                                    <h2 className="mb-4 text-[10px] font-black tracking-widest text-[var(--patients-accent)] uppercase">
+                                        Register New Alias HRN
+                                    </h2>
+                                    <form
+                                        onSubmit={submitHRN}
+                                        className="space-y-4"
                                     >
-                                        {processing
-                                            ? 'Processing...'
-                                            : 'Add HRN Record'}
-                                    </button>
-                                </form>
-                            </>
-                        )}
+                                        <div>
+                                            <label className={labelClass}>
+                                                HRN Number
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.hrns}
+                                                onChange={(e) => {
+                                                    const val =
+                                                        e.target.value.replace(
+                                                            /\D/g,
+                                                            '',
+                                                        );
+                                                    if (val.length <= 15)
+                                                        setData('hrns', val);
+                                                }}
+                                                className="mt-1 w-full rounded border border-[var(--patients-border)] bg-transparent px-3 py-2 font-mono text-sm focus:border-[var(--patients-accent)] focus:outline-none"
+                                                placeholder="Enter 15-digit HRN..."
+                                                required
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-full cursor-pointer bg-[var(--patients-accent)] px-4 py-2.5 text-[10px] font-black text-white uppercase transition-all hover:brightness-90 disabled:opacity-50"
+                                        >
+                                            {processing
+                                                ? 'Processing...'
+                                                : 'Add HRN Record'}
+                                        </button>
+                                    </form>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
@@ -801,7 +1028,7 @@ export default function PatientFolder({
                                                     selectedRecord.id,
                                                 )
                                             }
-                                            className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-blue-600 cursor-pointer"
+                                            className="flex cursor-pointer items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-blue-600"
                                         >
                                             <ImagePlus size={14} /> Add Image
                                         </button>
@@ -889,6 +1116,7 @@ export default function PatientFolder({
                     </div>
                 </div>
             )}
+
             {/* Upload Progress Overlay */}
             {isLoading && uploadProgress > 0 && (
                 <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -921,6 +1149,286 @@ export default function PatientFolder({
                             Please do not close the tab while optimizing and
                             merging images...
                         </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit MODAL */}
+            {(isAdmin || isStaff) && isEditModalOpen && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+                    <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-lg border border-[var(--patients-section-border)] bg-[var(--patients-section-bg)] shadow-2xl">
+                        <form onSubmit={handleUpdatePatient} className="p-8">
+                            {/* Header */}
+                            <div className="mb-10 flex items-center justify-between border-b border-[var(--patients-border)] pb-6">
+                                <h2 className="text-xl font-black tracking-widest text-[var(--patients-accent)] uppercase">
+                                    Edit Patient Folder
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        editForm.reset();
+                                        setIsEditModalOpen(false);
+                                    }}
+                                    className="cursor-pointer text-[10px] font-black text-red-500 uppercase hover:underline"
+                                >
+                                    Close Window
+                                </button>
+                            </div>
+
+                            {/* Identity Header (Names) */}
+                            <div className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+                                {(
+                                    [
+                                        { label: 'Last Name', key: 'lastname' },
+                                        {
+                                            label: 'First Name',
+                                            key: 'firstname',
+                                        },
+                                        {
+                                            label: 'Middle Name',
+                                            key: 'middlename',
+                                        },
+                                    ] as const
+                                ) // This tells TS these strings are specific keys, not just any string
+                                    .map((field) => (
+                                        <div
+                                            key={field.key}
+                                            className="space-y-1"
+                                        >
+                                            <label className="text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                {field.label}
+                                            </label>
+                                            <input
+                                                className="w-full border border-[var(--patients-border)] bg-[var(--background)] p-3 text-lg font-black text-[var(--patients-text)] uppercase outline-none focus:border-[var(--patients-accent)]"
+                                                // Type assertion here tells TS that field.key is a safe property of editForm.data
+                                                value={
+                                                    editForm.data[
+                                                        field.key as keyof typeof editForm.data
+                                                    ]
+                                                }
+                                                onChange={(e) =>
+                                                    editForm.setData(
+                                                        field.key as any, // 'any' or the specific union type fixes the setData error
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+                                {/* SECTION 1: CONTACT & STATUS */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-3 w-3 bg-[var(--patients-accent)]" />
+                                        <h3 className="text-[11px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                            Contact & Status
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                Phone
+                                            </label>
+                                            <input
+                                                className="w-full border-b border-[var(--patients-border)] bg-transparent pb-1 text-sm font-black text-[var(--patients-text)] outline-none focus:border-[var(--patients-accent)]"
+                                                value={
+                                                    editForm.data.phone_number
+                                                }
+                                                onChange={(e) =>
+                                                    editForm.setData(
+                                                        'phone_number',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {(
+                                                [
+                                                    'civil_status',
+                                                    'nationality',
+                                                ] as const
+                                            ).map((field) => (
+                                                <div key={field}>
+                                                    <label className="mb-1 block text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                        {field.replace(
+                                                            '_',
+                                                            ' ',
+                                                        )}
+                                                    </label>
+                                                    <input
+                                                        className="w-full border border-[var(--patients-border)] bg-transparent p-2 text-[10px] font-black text-[var(--patients-text)] uppercase outline-none focus:border-[var(--patients-accent)]"
+                                                        value={
+                                                            editForm.data[field]
+                                                        } // Now TS knows 'field' is a valid key
+                                                        onChange={(e) =>
+                                                            editForm.setData(
+                                                                field,
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 2: BIRTH & RELIGION */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-3 w-3 bg-[var(--patients-accent)]" />
+                                        <h3 className="text-[11px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                            Birth & Religion
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                Birthday
+                                            </label>
+                                            <input
+                                                type="date"
+                                                className="w-full border-b border-[var(--patients-border)] bg-transparent pb-1 text-sm font-black text-[var(--patients-text)] [color-scheme:dark] outline-none focus:border-[var(--patients-accent)]"
+                                                value={editForm.data.birthdate}
+                                                onChange={(e) =>
+                                                    editForm.setData(
+                                                        'birthdate',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                Religion
+                                            </label>
+                                            <input
+                                                className="w-full border-b border-[var(--patients-border)] bg-transparent pb-1 text-sm font-black text-[var(--patients-text)] uppercase outline-none focus:border-[var(--patients-accent)]"
+                                                value={editForm.data.religion}
+                                                onChange={(e) =>
+                                                    editForm.setData(
+                                                        'religion',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                Biological Sex
+                                            </label>
+                                            <select
+                                                className="w-full border-b border-[var(--patients-border)] bg-transparent pb-1 text-sm font-black text-[var(--patients-text)] uppercase outline-none"
+                                                value={editForm.data.sex}
+                                                onChange={(e) =>
+                                                    editForm.setData(
+                                                        'sex',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            >
+                                                <option
+                                                    value="Male"
+                                                    className="bg-[var(--patients-section-bg)]"
+                                                >
+                                                    Male
+                                                </option>
+                                                <option
+                                                    value="Female"
+                                                    className="bg-[var(--patients-section-bg)]"
+                                                >
+                                                    Female
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* SECTION 3: FULL ADDRESS */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-3 w-3 bg-[var(--patients-accent)]" />
+                                        <h3 className="text-[11px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                            Full Address
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="mb-1 block text-[10px] font-black tracking-widest text-[var(--patients-muted)] uppercase">
+                                                Street / House No.
+                                            </label>
+                                            <input
+                                                className="w-full border-b border-[var(--patients-border)] bg-transparent pb-1 text-sm font-black text-[var(--patients-text)] uppercase outline-none focus:border-[var(--patients-accent)]"
+                                                value={editForm.data.street}
+                                                onChange={(e) =>
+                                                    editForm.setData(
+                                                        'street',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+
+                                        {/* Using 'as const' here solves the indexing error */}
+                                        {(
+                                            [
+                                                'barangay',
+                                                'municipality',
+                                                'province',
+                                            ] as const
+                                        ).map((loc) => (
+                                            <div
+                                                key={loc}
+                                                className="grid grid-cols-[60px_1fr] items-center gap-2"
+                                            >
+                                                <label className="text-[10px] font-black text-[var(--patients-muted)] uppercase">
+                                                    {loc.substring(0, 4)}:
+                                                </label>
+                                                <input
+                                                    className="border-b border-[var(--patients-border)] bg-transparent pb-1 text-left text-xs font-black text-[var(--patients-text)] uppercase outline-none focus:border-[var(--patients-accent)]"
+                                                    value={editForm.data[loc]}
+                                                    onChange={(e) =>
+                                                        editForm.setData(
+                                                            loc as any,
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer Buttons */}
+                            <div className="mt-12 flex justify-end gap-3 border-t border-[var(--patients-border)] pt-8">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        editForm.reset(); // Reverts to the initial props (patient data)
+                                        setIsEditModalOpen(false); // Closes the modal
+                                    }}
+                                    className="cursor-pointer px-6 py-2 text-[10px] font-black text-[var(--patients-muted)] uppercase transition-colors hover:text-[var(--patients-text)]"
+                                >
+                                    Discard Changes
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={editForm.processing}
+                                    className="cursor-pointer bg-[var(--button-bg)] px-10 py-3 text-[10px] font-black text-[var(--button-text)] uppercase shadow-lg transition-all hover:bg-[var(--button-hover-bg)] disabled:opacity-50"
+                                >
+                                    {editForm.processing
+                                        ? 'Syncing...'
+                                        : 'Update Records'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -317,4 +317,5 @@ class PatientPdfController extends Controller
             return redirect()->back()->withErrors(['error' => 'Deletion failed.']);
         }
     }
+    
 }

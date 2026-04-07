@@ -21,13 +21,13 @@ class PatientStoreRequest extends FormRequest
                 'hrns'       => 'required|string|size:15', // Exact 15 digits
             ];
         }
-
+        
         // Full Patient Creation Rules
         return [
             'firstname'      => 'required|string|max:50',
             'lastname'       => 'required|string|max:50',
             'middlename'     => 'nullable|string|max:50',
-            'hrn'            => ['required', 'string', Rule::unique('patients', 'hrn')],
+            'hrn'            => ['required', 'string', Rule::unique('patients', 'hrn')->ignore($this->route('patient') ?? $this->patient_id)],
             'sex'            => 'required|in:Male,Female',
             'civil_status'   => 'required|string|max:20',
             'nationality'    => 'required|string|max:50',

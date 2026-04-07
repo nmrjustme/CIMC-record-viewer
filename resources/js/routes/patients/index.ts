@@ -157,7 +157,7 @@ folder.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     folder.form = folderForm
 /**
 * @see \App\Http\Controllers\patientsController::addHrn
- * @see app/Http/Controllers/patientsController.php:138
+ * @see app/Http/Controllers/patientsController.php:139
  * @route '/patients/add-hrn'
  */
 export const addHrn = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -172,7 +172,7 @@ addHrn.definition = {
 
 /**
 * @see \App\Http\Controllers\patientsController::addHrn
- * @see app/Http/Controllers/patientsController.php:138
+ * @see app/Http/Controllers/patientsController.php:139
  * @route '/patients/add-hrn'
  */
 addHrn.url = (options?: RouteQueryOptions) => {
@@ -181,7 +181,7 @@ addHrn.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\patientsController::addHrn
- * @see app/Http/Controllers/patientsController.php:138
+ * @see app/Http/Controllers/patientsController.php:139
  * @route '/patients/add-hrn'
  */
 addHrn.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -191,7 +191,7 @@ addHrn.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\patientsController::addHrn
- * @see app/Http/Controllers/patientsController.php:138
+ * @see app/Http/Controllers/patientsController.php:139
  * @route '/patients/add-hrn'
  */
     const addHrnForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -201,7 +201,7 @@ addHrn.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\patientsController::addHrn
- * @see app/Http/Controllers/patientsController.php:138
+ * @see app/Http/Controllers/patientsController.php:139
  * @route '/patients/add-hrn'
  */
         addHrnForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -309,7 +309,7 @@ edit.head = (args: { patient: string | number } | [patient: string | number ] | 
     edit.form = editForm
 /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:153
+ * @see app/Http/Controllers/patientsController.php:203
  * @route '/patients/{patient}'
  */
 export const update = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -324,7 +324,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:153
+ * @see app/Http/Controllers/patientsController.php:203
  * @route '/patients/{patient}'
  */
 update.url = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -352,7 +352,7 @@ update.url = (args: { patient: string | number } | [patient: string | number ] |
 
 /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:153
+ * @see app/Http/Controllers/patientsController.php:203
  * @route '/patients/{patient}'
  */
 update.put = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -362,7 +362,7 @@ update.put = (args: { patient: string | number } | [patient: string | number ] |
 
     /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:153
+ * @see app/Http/Controllers/patientsController.php:203
  * @route '/patients/{patient}'
  */
     const updateForm = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -377,7 +377,7 @@ update.put = (args: { patient: string | number } | [patient: string | number ] |
 
             /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:153
+ * @see app/Http/Controllers/patientsController.php:203
  * @route '/patients/{patient}'
  */
         updateForm.put = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -393,7 +393,7 @@ update.put = (args: { patient: string | number } | [patient: string | number ] |
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -408,7 +408,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
 create.url = (options?: RouteQueryOptions) => {
@@ -417,7 +417,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -426,7 +426,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -436,7 +436,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
     const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -446,7 +446,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
         createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -455,7 +455,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\patientsController::create
- * @see app/Http/Controllers/patientsController.php:82
+ * @see app/Http/Controllers/patientsController.php:83
  * @route '/patients/create'
  */
         createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -471,7 +471,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     create.form = createForm
 /**
 * @see \App\Http\Controllers\patientsController::store
- * @see app/Http/Controllers/patientsController.php:100
+ * @see app/Http/Controllers/patientsController.php:101
  * @route '/patients'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -486,7 +486,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\patientsController::store
- * @see app/Http/Controllers/patientsController.php:100
+ * @see app/Http/Controllers/patientsController.php:101
  * @route '/patients'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -495,7 +495,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\patientsController::store
- * @see app/Http/Controllers/patientsController.php:100
+ * @see app/Http/Controllers/patientsController.php:101
  * @route '/patients'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -505,7 +505,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\patientsController::store
- * @see app/Http/Controllers/patientsController.php:100
+ * @see app/Http/Controllers/patientsController.php:101
  * @route '/patients'
  */
     const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -515,7 +515,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\patientsController::store
- * @see app/Http/Controllers/patientsController.php:100
+ * @see app/Http/Controllers/patientsController.php:101
  * @route '/patients'
  */
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
