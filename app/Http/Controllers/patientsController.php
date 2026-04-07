@@ -48,30 +48,30 @@ class PatientsController extends Controller
 
         return redirect()->route('patients.folder');
     }
-    
+
     public function getFiles(Request $request)
     {
         $hrn = $request->input('hrn') ?? session('active_hrn');
-        
+
         if (!$hrn) {
             return redirect()->route('patients.index')
                 ->with('error', 'Patient record not found or session expired.');
         }
-        
+
         $patient = patients::with(['information.address', 'hrns'])
             ->where('hrn', $hrn)
             ->firstOrFail();
-        
+
         // $this->logActivity('VIEW', "Accessed folder for: {$patient->firstname} {$patient->lastname}", 'Patient Records');
-        
+
         // We eager load 'file' and its nested 'pages' (dbo.record_pages)
         $records = $patient->records()
             ->with(['file.pages'])
             ->latest()
             ->paginate(50);
-            
+
             // dd($records->toArray());
-        
+
         return Inertia::render('PatientFolder', [
             'patient'  => $patient,
             // Ensure the Resource can handle the nested 'pages'
@@ -100,7 +100,7 @@ class PatientsController extends Controller
     public function store(PatientStoreRequest $request)
     {
         $validated = $request->validated();
-        
+
         $patient = DB::transaction(function () use ($validated) {
             $patient = patients::create([
                 'hrn'        => $validated['hrn'],
@@ -109,7 +109,7 @@ class PatientsController extends Controller
                 'lastname'   => $validated['lastname'],
                 'created_by' => Auth::id(),
             ]);
-            
+
             $info = $patient->information()->create([ // Using relationship
                 'sex'            => $validated['sex'],
                 'civil_status'   => $validated['civil_status'],
@@ -134,7 +134,7 @@ class PatientsController extends Controller
 
         return redirect()->route('patients.create')->with('success', 'Patient record created.');
     }
-    
+
     public function addHRN(PatientStoreRequest $request)
     {
         $validated = $request->validated();
@@ -148,5 +148,19 @@ class PatientsController extends Controller
         $this->logActivity('CREATE', "Added HRN to ID {$validated['patient_id']}", 'Patient HRN');
 
         return back()->with('success', 'New HRN added successfully.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'hrn' => 'required|digits:15|unique:patient_hrns,hrn,' . $id,
+        ]);
+
+        $hrn = PatientHRN::findOrFail($id);
+        $hrn->update([
+            'hrn' => $request->hrn,
+        ]);
+
+        return back()->with('success', 'HRN updated successfully.');
     }
 }

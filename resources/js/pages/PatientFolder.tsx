@@ -99,7 +99,9 @@ export default function PatientFolder({
         'LABORATORY',
         'RADIO',
     ]);
-    // const [categories, setCategories] = useState([]);
+
+    const [editingHRNId, setEditingHRNId] = useState(null);
+    const [editingValue, setEditingValue] = useState('');
 
     useEffect(() => {
         axios
@@ -323,6 +325,19 @@ export default function PatientFolder({
         { title: "Patient's Folder", href: '/viewer/record-finder' },
     ];
 
+    const updateHRN = (id) => {
+        router.put(
+            `/hrns/${id}`,
+            { hrn: editingValue },
+            {
+                onSuccess: () => {
+                    setEditingHRNId(null);
+                    setEditingValue('');
+                },
+            },
+        );
+    };
+
     const pageContent = (
         <div className="min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title={`${patient.lastname}'s Records`} />
@@ -414,12 +429,20 @@ export default function PatientFolder({
                                         {patient.hrn}
                                     </span>
                                 </p>
-                                <button
-                                    onClick={() => setIsHRNModalOpen(true)}
-                                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--button-border)] px-4 py-1.5 text-sm font-medium hover:border-[var(--button-border-hover)] dark:bg-gray-800"
-                                >
-                                    View HRN
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setIsHRNModalOpen(true)}
+                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--button-border)] px-4 py-1.5 text-sm font-medium hover:border-[var(--button-border-hover)] dark:bg-gray-800"
+                                    >
+                                        Edit Patient
+                                    </button>
+                                    <button
+                                        onClick={() => setIsHRNModalOpen(true)}
+                                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--button-border)] px-4 py-1.5 text-sm font-medium hover:border-[var(--button-border-hover)] dark:bg-gray-800"
+                                    >
+                                        View HRN
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -600,12 +623,32 @@ export default function PatientFolder({
                             >
                                 Existing HRNs
                             </label>
-                            {patient.hrns && patient.hrns.length > 0 ? (
-                                patient.hrns.map((h) => (
-                                    <div
-                                        key={h.id}
-                                        className={`flex items-center justify-between rounded border px-3 py-2 font-mono text-xs ${h.hrn === patient.hrn ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10' : 'border-[var(--patients-border)]'}`}
-                                    >
+                            {patient.hrns.map((h) => (
+                                <div
+                                    key={h.id}
+                                    className={`flex items-center justify-between rounded border px-3 py-2 font-mono text-xs ${
+                                        h.hrn === patient.hrn
+                                            ? 'border-[var(--patients-accent)] bg-[var(--patients-accent)]/10'
+                                            : 'border-[var(--patients-border)]'
+                                    }`}
+                                >
+                                    {/* LEFT SIDE */}
+                                    {editingHRNId === h.id ? (
+                                        <input
+                                            type="text"
+                                            value={editingValue}
+                                            onChange={(e) => {
+                                                const val =
+                                                    e.target.value.replace(
+                                                        /\D/g,
+                                                        '',
+                                                    );
+                                                if (val.length <= 15)
+                                                    setEditingValue(val);
+                                            }}
+                                            className="w-full rounded border px-2 py-1 text-xs"
+                                        />
+                                    ) : (
                                         <span
                                             className={
                                                 h.hrn === patient.hrn
@@ -615,18 +658,59 @@ export default function PatientFolder({
                                         >
                                             {h.hrn}
                                         </span>
+                                    )}
+
+                                    {/* RIGHT SIDE ACTIONS */}
+                                    <div className="ml-2 flex items-center gap-2">
                                         {h.hrn === patient.hrn && (
                                             <span className="text-[8px] font-black text-[var(--patients-accent)] uppercase">
                                                 Main
                                             </span>
                                         )}
+
+                                        {(isAdmin || isStaff) && (
+                                            <>
+                                                {editingHRNId === h.id ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() =>
+                                                                updateHRN(h.id)
+                                                            }
+                                                            className="text-[9px] text-green-500 hover:underline"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={() =>
+                                                                setEditingHRNId(
+                                                                    null,
+                                                                )
+                                                            }
+                                                            className="text-[9px] text-gray-400 hover:underline"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingHRNId(
+                                                                h.id,
+                                                            );
+                                                            setEditingValue(
+                                                                h.hrn,
+                                                            );
+                                                        }}
+                                                        className="text-[9px] text-blue-500 hover:underline"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
-                                ))
-                            ) : (
-                                <p className="text-[10px] uppercase italic opacity-50">
-                                    No additional HRNs recorded.
-                                </p>
-                            )}
+                                </div>
+                            ))}
                         </div>
                         {(isAdmin || isStaff) && (
                             <>
@@ -687,6 +771,7 @@ export default function PatientFolder({
                     </div>
                 </div>
             )}
+
             {/* PDF VIEWER MODAL */}
             {selectedRecord && (
                 <div className="fixed inset-0 z-[100] flex flex-col bg-black/90 backdrop-blur-sm">
@@ -697,7 +782,7 @@ export default function PatientFolder({
                         <div className="flex items-center gap-4">
                             {/* File Support Indicator */}
                             <div className="flex items-center gap-4">
-                                {isAdmin && (
+                                {(isAdmin || isStaff) && (
                                     <>
                                         {/* Supported Files Info */}
                                         <div className="hidden flex-col items-end border-r border-white/10 pr-4 md:flex">
