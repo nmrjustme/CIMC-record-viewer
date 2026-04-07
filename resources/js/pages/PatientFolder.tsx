@@ -152,12 +152,45 @@ export default function PatientFolder({
         const files = e.target.files;
         if (!files || files.length === 0 || !targetFileId) return;
 
+        const selectedFiles = Array.from(files);
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const maxSize = 102400 * 1024; // 100MB in bytes
+
+        // 1. Check for unsupported types
+        const hasUnsupported = selectedFiles.some(
+            (file) => !allowedTypes.includes(file.type),
+        );
+
+        // 2. Check for oversized files
+        const hasOversized = selectedFiles.some((file) => file.size > maxSize);
+
+        if (hasUnsupported) {
+            setNotificationMessage(
+                'Unsupported file detected. Please upload only JPG, JPEG, or PNG images.',
+            );
+            setNotificationType('error');
+            setShowNotification(true);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        if (hasOversized) {
+            setNotificationMessage(
+                'One or more images exceed the 100MB limit.',
+            );
+            setNotificationType('error');
+            setShowNotification(true);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        // If validation passes, proceed with upload
         setIsLoading(true);
-        setUploadProgress(0); // Reset progress
+        setUploadProgress(0);
 
         router.post(
             `/pdf/upload-image/${targetFileId}`,
-            { images: Array.from(files) },
+            { images: selectedFiles },
             {
                 forceFormData: true,
                 onProgress: (progress) => {
@@ -173,9 +206,7 @@ export default function PatientFolder({
                         (r) => r.id === targetFileId,
                     );
 
-                    if (freshRecord) {
-                        setSelectedRecord(freshRecord);
-                    }
+                    if (freshRecord) setSelectedRecord(freshRecord);
 
                     setNotificationMessage(
                         `${files.length} images appended to PDF!`,
@@ -184,14 +215,18 @@ export default function PatientFolder({
                     setShowNotification(true);
                     setPdfVersion((v) => v + 1);
                 },
-                onError: () => {
-                    setNotificationMessage('Upload failed. Check file sizes.');
+                onError: (errors) => {
+                    // This catches Laravel validation errors (like mimes or max)
+                    const serverError = Object.values(errors)[0];
+                    setNotificationMessage(
+                        serverError || 'Upload failed. Check file integrity.',
+                    );
                     setNotificationType('error');
                     setShowNotification(true);
                 },
                 onFinish: () => {
                     setIsLoading(false);
-                    setUploadProgress(0); // Clear progress
+                    setUploadProgress(0);
                     setTargetFileId(null);
                     if (fileInputRef.current) fileInputRef.current.value = '';
                 },
@@ -305,7 +340,7 @@ export default function PatientFolder({
 
             {showNotification && (
                 <div
-                    className={`fixed right-5 bottom-5 z-[250] flex animate-in items-center gap-3 rounded-lg border-l-4 px-6 py-4 font-bold text-white shadow-2xl duration-300 slide-in-from-bottom-5 fade-in ${
+                    className={`fixed top-5 left-5 z-[250] flex animate-in items-center gap-3 rounded-lg border-l-4 px-6 py-4 font-bold text-white shadow-2xl duration-300 slide-in-from-top-5 fade-in ${
                         notificationType === 'success'
                             ? 'border-green-500 bg-zinc-900'
                             : 'border-red-500 bg-zinc-900'
@@ -659,21 +694,42 @@ export default function PatientFolder({
                         <h2 className="text-sm font-black uppercase">
                             {selectedRecord.file_name}
                         </h2>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() =>
-                                    handleAddImage(selectedRecord.id)
-                                }
-                                className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black uppercase hover:bg-blue-600"
-                            >
-                                <ImagePlus size={14} /> Append Images
-                            </button>
-                            <button
-                                onClick={() => setSelectedRecord(null)}
-                                className="bg-red-600 px-4 py-2 text-[10px] font-black uppercase"
-                            >
-                                Close
-                            </button>
+                        <div className="flex items-center gap-4">
+                            {/* File Support Indicator */}
+                            <div className="flex items-center gap-4">
+                                {isAdmin && (
+                                    <>
+                                        {/* Supported Files Info */}
+                                        <div className="hidden flex-col items-end border-r border-white/10 pr-4 md:flex">
+                                            <span className="text-[8px] font-black tracking-[0.2em] text-white/40 uppercase">
+                                                Supported Files
+                                            </span>
+                                            <span className="text-[9px] font-bold text-[var(--patients-accent)]">
+                                                JPG, PNG, JPEG
+                                            </span>
+                                        </div>
+
+                                        {/* Action Button */}
+                                        <button
+                                            onClick={() =>
+                                                handleAddImage(
+                                                    selectedRecord.id,
+                                                )
+                                            }
+                                            className="flex items-center gap-2 rounded bg-white/10 px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-blue-600"
+                                        >
+                                            <ImagePlus size={14} /> Add Image
+                                        </button>
+                                    </>
+                                )}
+
+                                <button
+                                    onClick={() => setSelectedRecord(null)}
+                                    className="cursor-pointer bg-red-600 px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all hover:bg-red-700"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
 

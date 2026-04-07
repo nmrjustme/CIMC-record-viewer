@@ -107,11 +107,14 @@ class PatientPdfController extends Controller
         // 1. Validation for multiple images
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,dng|max:102400', // 20MB per image
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:102400', // 20MB per image
+        ], [
+            'images.*.image' => 'You uploaded multiple files, but at least one file type is not accepted.',
+            'images.*.mimes' => 'Only JPEG, PNG, and JPG files are supported.',
         ]);
 
         DB::beginTransaction();
-
+        
         try {
             $fileRecord = PatientsRecordsFileModel::with('records.patient')->findOrFail($fileId);
             $patient = $fileRecord->records->patient;

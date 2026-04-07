@@ -130,7 +130,7 @@ uploadImage.post = (args: { fileId: string | number } | [fileId: string | number
     uploadImage.form = uploadImageForm
 /**
 * @see \App\Http\Controllers\PatientPdfController::deleteFile
- * @see app/Http/Controllers/PatientPdfController.php:200
+ * @see app/Http/Controllers/PatientPdfController.php:203
  * @route '/pdf/delete-file/{id}'
  */
 export const deleteFile = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -145,7 +145,7 @@ deleteFile.definition = {
 
 /**
 * @see \App\Http\Controllers\PatientPdfController::deleteFile
- * @see app/Http/Controllers/PatientPdfController.php:200
+ * @see app/Http/Controllers/PatientPdfController.php:203
  * @route '/pdf/delete-file/{id}'
  */
 deleteFile.url = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -173,7 +173,7 @@ deleteFile.url = (args: { id: string | number } | [id: string | number ] | strin
 
 /**
 * @see \App\Http\Controllers\PatientPdfController::deleteFile
- * @see app/Http/Controllers/PatientPdfController.php:200
+ * @see app/Http/Controllers/PatientPdfController.php:203
  * @route '/pdf/delete-file/{id}'
  */
 deleteFile.delete = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -183,7 +183,7 @@ deleteFile.delete = (args: { id: string | number } | [id: string | number ] | st
 
     /**
 * @see \App\Http\Controllers\PatientPdfController::deleteFile
- * @see app/Http/Controllers/PatientPdfController.php:200
+ * @see app/Http/Controllers/PatientPdfController.php:203
  * @route '/pdf/delete-file/{id}'
  */
     const deleteFileForm = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -198,7 +198,7 @@ deleteFile.delete = (args: { id: string | number } | [id: string | number ] | st
 
             /**
 * @see \App\Http\Controllers\PatientPdfController::deleteFile
- * @see app/Http/Controllers/PatientPdfController.php:200
+ * @see app/Http/Controllers/PatientPdfController.php:203
  * @route '/pdf/delete-file/{id}'
  */
         deleteFileForm.delete = (args: { id: string | number } | [id: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
