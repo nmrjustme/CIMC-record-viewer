@@ -911,7 +911,7 @@ export default function PatientFolder({
                                                                         h.id,
                                                                     )
                                                                 }
-                                                                className="text-[9px] font-bold text-green-500 cursor-pointer hover:underline"
+                                                                className="cursor-pointer text-[9px] font-bold text-green-500 hover:underline"
                                                             >
                                                                 Save
                                                             </button>
@@ -921,7 +921,7 @@ export default function PatientFolder({
                                                                         null,
                                                                     )
                                                                 }
-                                                                className="text-[9px] font-bold text-gray-400 cursor-pointer hover:underline"
+                                                                className="cursor-pointer text-[9px] font-bold text-gray-400 hover:underline"
                                                             >
                                                                 Cancel
                                                             </button>
@@ -936,7 +936,7 @@ export default function PatientFolder({
                                                                     h.hrn,
                                                                 );
                                                             }}
-                                                            className="text-[9px] font-bold text-blue-500 cursor-pointer hover:underline"
+                                                            className="cursor-pointer text-[9px] font-bold text-blue-500 hover:underline"
                                                         >
                                                             Edit
                                                         </button>
@@ -1055,62 +1055,66 @@ export default function PatientFolder({
                             />
                         </div>
 
-                        {/* CORRECTED RIGHT SIDEBAR */}
+                        {/* CORRECTED RIGHT SIDEBAR - DESCENDING ORDER */}
                         {(isAdmin || isStaff) && (
                             <div className="hidden w-72 overflow-y-auto border-l border-white/10 bg-black/50 p-4 md:block">
                                 <h3 className="mb-4 text-[9px] font-black tracking-widest text-white/40 uppercase">
-                                    PDF Pages
+                                    PDF Pages (Newest First)
                                 </h3>
                                 <div className="space-y-4">
-                                    {selectedRecord.pages?.map((page, idx) => {
-                                        // Detect if this is a valid image or a placeholder
-                                        const isBrokenImage =
-                                            !page.image_path ||
-                                            page.image_path.endsWith('/');
+                                    {/* Sort pages by ID descending (b.id - a.id) */}
+                                    {selectedRecord.pages
+                                        ?.slice()
+                                        .sort((a, b) => b.id - a.id)
+                                        .map((page, idx) => {
+                                            const isBrokenImage =
+                                                !page.image_path ||
+                                                page.image_path.endsWith('/');
 
-                                        return (
-                                            <div
-                                                key={page.id}
-                                                className="group relative rounded border border-white/10 bg-white/5 p-2 transition-all hover:bg-white/10"
-                                            >
-                                                <div className="mb-2 flex aspect-[3/4] w-full items-center justify-center overflow-hidden rounded bg-zinc-900">
-                                                    {!isBrokenImage ? (
-                                                        <img
-                                                            src={
-                                                                page.image_path
-                                                            }
-                                                            alt={`Page ${idx + 1}`}
-                                                            className="h-full w-full object-cover opacity-80 group-hover:opacity-100"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex flex-col items-center gap-2 text-white/20">
-                                                            <FileText
-                                                                size={32}
+                                            return (
+                                                <div
+                                                    key={page.id}
+                                                    className="group relative rounded border border-white/10 bg-white/5 p-2 transition-all hover:bg-white/10"
+                                                >
+                                                    <div className="mb-2 flex aspect-[3/4] w-full items-center justify-center overflow-hidden rounded bg-zinc-900">
+                                                        {!isBrokenImage ? (
+                                                            <img
+                                                                src={
+                                                                    page.image_path
+                                                                }
+                                                                alt={`Page ${idx + 1}`}
+                                                                className="h-full w-full object-cover opacity-80 group-hover:opacity-100"
                                                             />
-                                                            <span className="text-[9px] font-black uppercase">
-                                                                Cover Page
-                                                            </span>
-                                                        </div>
-                                                    )}
+                                                        ) : (
+                                                            <div className="flex flex-col items-center gap-2 text-white/20">
+                                                                <FileText
+                                                                    size={32}
+                                                                />
+                                                                <span className="text-[9px] font-black uppercase">
+                                                                    Cover Page
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[8px] font-bold text-white/30">
+                                                            {/* Keep index label relevant to current view */}
+                                                            ITEM {idx + 1}
+                                                        </span>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDeleteImage(
+                                                                    page.id,
+                                                                )
+                                                            }
+                                                            className="cursor-pointer text-[9px] font-black text-red-500 uppercase hover:text-red-400"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[8px] font-bold text-white/30">
-                                                        PAGE {idx + 1}
-                                                    </span>
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDeleteImage(
-                                                                page.id,
-                                                            )
-                                                        }
-                                                        className="cursor-pointer text-[9px] font-black text-red-500 uppercase hover:text-red-400"
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
                                 </div>
                             </div>
                         )}
