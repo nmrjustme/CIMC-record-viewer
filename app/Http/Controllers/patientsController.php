@@ -145,33 +145,33 @@ class PatientsController extends Controller
             'hrn'        => $validated['hrns'],
             'is_primary' => false,
         ]);
-
+        
         $this->logActivity('CREATE', "Added HRN to ID {$validated['patient_id']}", 'Patient HRN');
-
+        
         return back()->with('success', 'New HRN added successfully.');
     }
-
+    
     public function update_hrns(Request $request, $id)
     {
         $request->validate([
             'hrn' => 'required|digits:15|unique:patient_hrns,hrn,' . $id,
         ]);
-
+        
         $hrn = PatientHRN::with('patient')->findOrFail($id);
         $oldHrn = $hrn->hrn;
         $hrn->update([
             'hrn' => $request->hrn,
         ]);
-
+        
         $this->logActivity(
             'UPDATE',
             "Updated secondary HRN from {$oldHrn} to {$request->hrn} (Name: {$hrn->patient->lastname} {$hrn->patient->firstname})",
             'Patient HRN'
         );
-
+        
         return back()->with('success', 'HRN updated successfully.');
     }
-
+    
     public function update_primary(Request $request, $id)
     {
         $patient = patients::findOrFail($id);
@@ -197,14 +197,12 @@ class PatientsController extends Controller
 
         return back()->with('message', 'Primary HRN updated successfully.');
     }
-
-    // Add this to PatientsController.php
-
+    
     public function update(PatientStoreRequest $request, $id)
     {
         $validated = $request->validated();
         $patient = patients::findOrFail($id);
-
+        
         DB::transaction(function () use ($validated, $patient) {
             // 1. Update Basic Info
             $patient->update([

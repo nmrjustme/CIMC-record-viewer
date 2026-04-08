@@ -309,7 +309,7 @@ edit.head = (args: { patient: string | number } | [patient: string | number ] | 
     edit.form = editForm
 /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:203
+ * @see app/Http/Controllers/patientsController.php:201
  * @route '/patients/{patient}'
  */
 export const update = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -324,7 +324,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:203
+ * @see app/Http/Controllers/patientsController.php:201
  * @route '/patients/{patient}'
  */
 update.url = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -352,7 +352,7 @@ update.url = (args: { patient: string | number } | [patient: string | number ] |
 
 /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:203
+ * @see app/Http/Controllers/patientsController.php:201
  * @route '/patients/{patient}'
  */
 update.put = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -362,7 +362,7 @@ update.put = (args: { patient: string | number } | [patient: string | number ] |
 
     /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:203
+ * @see app/Http/Controllers/patientsController.php:201
  * @route '/patients/{patient}'
  */
     const updateForm = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -377,7 +377,7 @@ update.put = (args: { patient: string | number } | [patient: string | number ] |
 
             /**
 * @see \App\Http\Controllers\patientsController::update
- * @see app/Http/Controllers/patientsController.php:203
+ * @see app/Http/Controllers/patientsController.php:201
  * @route '/patients/{patient}'
  */
         updateForm.put = (args: { patient: string | number } | [patient: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

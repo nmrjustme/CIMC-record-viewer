@@ -193,7 +193,7 @@ export default function AddPatient({ patients, nationalities, auth }: Props) {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                         <div className="md:col-span-1">
                             <label className={labelClass}>
-                                HRN (15 Digits)
+                                HRN (PRIMARY)
                             </label>
                             <input
                                 type="text"

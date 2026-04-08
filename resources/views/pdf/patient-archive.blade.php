@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Patient Archive - {{ $category }}</title>
     <style>
         /* Define page margins */
         @page {
-            margin: 0.5cm; /* Small margin to prevent edge clipping on printers */
+            margin: 0.5cm;
+            /* Small margin to prevent edge clipping on printers */
         }
-        
+
         body {
             font-family: 'Helvetica', sans-serif;
             margin: 0;
@@ -24,6 +26,7 @@
             color: #ffffff;
             padding: 15px 20px;
         }
+
         .header h1 {
             margin: 0;
             font-size: 16px;
@@ -45,7 +48,7 @@
             /* Calculate height to account for header/info bar on page 1.
                For subsequent pages, 95vh ensures it doesn't bleed over.
             */
-            height: 90vh; 
+            height: 90vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -73,7 +76,7 @@
             bottom: 5px;
             width: 100%;
             text-align: center;
-            font-size: 8px;
+            font-size: 22px;
             color: #999;
         }
 
@@ -85,36 +88,38 @@
         }
     </style>
 </head>
+
 <body>
 
-    <div class="header">
-        <h1>{{ $category }}</h1>
-    </div>
 
-    <div class="info-bar">
-        <strong>PATIENT:</strong> {{ strtoupper($patient->lastname) }}, {{ strtoupper($patient->firstname) }} | 
-        <strong>HRN:</strong> {{ $patient->hrn }} | 
-        <strong>DATE:</strong> {{ $date }}
-    </div>
 
     <div class="content">
         @if(isset($importImages) && count($importImages) > 0)
-            @foreach($importImages as $img)
-                <div class="image-container">
-                    <img src="{{ $img }}" class="scanned-image">
-                </div>
-            @endforeach
-        @else
-            <div class="no-content">
-                <h2 style="text-transform: uppercase; letter-spacing: 5px;">Blank Record</h2>
-                <p>No images have been appended to this folder yet.</p>
+        @foreach($importImages as $img)
+            <div class="header">
+                <h1>{{ $category }}</h1>
             </div>
+            <div class="info-bar">
+                <strong>PATIENT:</strong> {{ strtoupper($patient->lastname) }}, {{ strtoupper($patient->firstname) }} |
+                <strong>HRN:</strong> {{ $patient->hrn }} |
+                <strong>DATE:</strong> {{ $date }}
+            </div>
+            <div class="image-container">
+                <img src="{{ $img }}" class="scanned-image">
+            </div>
+        @endforeach
+        @else
+        <div class="no-content">
+            <h2 style="text-transform: uppercase; letter-spacing: 5px;">Blank Record</h2>
+            <p>No images have been appended to this folder yet.</p>
+        </div>
         @endif
     </div>
 
     <div class="footer">
-        CIMC Patient Record System - Internal Document - Generated on {{ $date }}
+        CIMC Patient Record System - Uploaded on {{ $date }}
     </div>
 
 </body>
+
 </html>

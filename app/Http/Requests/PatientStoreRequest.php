@@ -18,11 +18,10 @@ class PatientStoreRequest extends FormRequest
         if ($this->has('hrns') && !$this->has('firstname')) {
             return [
                 'patient_id' => 'required|exists:patients,id',
-                'hrns'       => 'required|string|size:15', // Exact 15 digits
+                'hrns'       => 'required|string|size:15',
             ];
         }
-        
-        // Full Patient Creation Rules
+
         return [
             'firstname'      => 'required|string|max:50',
             'lastname'       => 'required|string|max:50',

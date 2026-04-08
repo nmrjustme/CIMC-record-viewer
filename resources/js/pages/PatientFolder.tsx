@@ -431,6 +431,7 @@ export default function PatientFolder({
         }
         return age;
     };
+
     const pageContent = (
         <div className="min-h-screen bg-[var(--patients-sidebar-bg)] text-[var(--patients-text)] transition-colors duration-200">
             <Head title={`${patient.lastname}'s Records`} />
@@ -815,7 +816,7 @@ export default function PatientFolder({
                                                     if (val.length <= 15)
                                                         setEditingValue(val);
                                                 }}
-                                                className="w-full rounded border border-blue-500 bg-zinc-900 px-2 py-1 text-white outline-none"
+                                                className="w-full rounded border border-blue-500 bg-[var(--background)] px-2 py-1 text-[var(--patients-text)] outline-none"
                                             />
                                             <div className="flex justify-end gap-2">
                                                 <button
@@ -895,7 +896,7 @@ export default function PatientFolder({
                                                                 val,
                                                             );
                                                     }}
-                                                    className="w-full rounded border border-[var(--patients-accent)] bg-zinc-900 px-2 py-1 text-xs text-white outline-none"
+                                                    className="w-full rounded border border-[var(--patients-accent)] bg-[var(--background)] px-2 py-1 text-xs text-[var(----patients-text)] outline-none"
                                                 />
                                             ) : (
                                                 <span>{h.hrn}</span>
@@ -910,7 +911,7 @@ export default function PatientFolder({
                                                                         h.id,
                                                                     )
                                                                 }
-                                                                className="text-[9px] font-bold text-green-500"
+                                                                className="text-[9px] font-bold text-green-500 cursor-pointer hover:underline"
                                                             >
                                                                 Save
                                                             </button>
@@ -920,7 +921,7 @@ export default function PatientFolder({
                                                                         null,
                                                                     )
                                                                 }
-                                                                className="text-[9px] font-bold text-gray-400"
+                                                                className="text-[9px] font-bold text-gray-400 cursor-pointer hover:underline"
                                                             >
                                                                 Cancel
                                                             </button>
@@ -935,7 +936,7 @@ export default function PatientFolder({
                                                                     h.hrn,
                                                                 );
                                                             }}
-                                                            className="text-[9px] font-bold text-blue-500"
+                                                            className="text-[9px] font-bold text-blue-500 cursor-pointer hover:underline"
                                                         >
                                                             Edit
                                                         </button>
