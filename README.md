@@ -13,5 +13,5 @@ A robust digital record viewer and archiving system designed specifically for th
 
 * **Backend:** PHP / Laravel
 * **Frontend:** React / TypeScript / Tailwind CSS
-* **Database:** MySQL
+* **Database:** SQL Server
 * **Architecture:** RESTful API with a singular-model convention (e.g., `Patient`)
